@@ -242,8 +242,8 @@ class xini_node_t
 
     // constructor/destructor
 protected:
-    explicit xini_node_t(xini_ntype_t xini_ntype, xini_node_t * xowner_ptr)
-        : m_xemt_ntype(xini_ntype)
+    xini_node_t(int xini_ntype, xini_node_t * xowner_ptr)
+        : m_xini_ntype(xini_ntype)
         , m_xowner_ptr(xowner_ptr)
     {
 
@@ -293,7 +293,7 @@ public:
     /**
      * @brief 节点类型。
      */
-    inline xini_ntype_t ntype(void) const { return m_xemt_ntype; }
+    inline int ntype(void) const { return m_xini_ntype; }
 
     /**********************************************************/
     /**
@@ -303,7 +303,7 @@ public:
 
     // data members
 protected:
-    xini_ntype_t  m_xemt_ntype;   ///< 节点类型
+    int           m_xini_ntype;   ///< 节点类型
     xini_node_t * m_xowner_ptr;   ///< 节点持有者
 };
 
@@ -912,6 +912,24 @@ public:
 
     /**********************************************************/
     /**
+     * @brief 分节 内的节点数量。
+     */
+    inline size_t size(void) const
+    {
+        return m_xlst_node.size();
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 分节 是否为空。
+     */
+    inline bool empty() const
+    {
+        return m_xlst_node.empty();
+    }
+
+    /**********************************************************/
+    /**
      * @brief 判断当前分节是否以空行结尾。
      */
     inline bool has_end_nilline(void)
@@ -1016,11 +1034,12 @@ protected:
         std::list< xini_node_t * > xlst_node;
 
         size_t xst_line =  0;
+        size_t xst_maxl = m_xlst_node.size();
 
         // 节点表只有三种类型的节点：键值，空行，注释，
         // 以及 另外加上 自身的 分节节点
 
-        while (xst_line++ < m_xlst_node.size())
+        while ((xst_line++ < xst_maxl) && !m_xlst_node.empty())
         {
             xini_node_t * xnode_ptr = m_xlst_node.back();
 
@@ -1076,7 +1095,6 @@ protected:
     }
 
 protected:
-    xini_node_t              * m_owner_ptr;  ///< 分节持有者（所属文件）
     std::string                m_xstr_name;  ///< 分节名称
     std::list< xini_node_t * > m_xlst_node;  ///< 分节下的节点表
 };
@@ -1152,6 +1170,9 @@ public:
              itlst != m_xlst_sect.end();
              ++itlst)
         {
+            if ((*itlst)->empty())
+                continue;
+
             **itlst >> ostr;
             if (!(*itlst)->has_end_nilline() &&
                 ((*itlst) != m_xlst_sect.back()))
@@ -1245,11 +1266,21 @@ public:
                 xsect_ptr =
                     push_sect(static_cast< xini_section_t * >(xnode_ptr),
                               xsect_ptr);
+
+                if (xsect_ptr != static_cast< xini_section_t * >(xnode_ptr))
+                    delete xnode_ptr; // 添加新分节失败，删除该节点
+                else
+                    set_dirty(true);  // 添加新分节成功，设置脏标识
+
                 continue;
             }
 
             // 加入 当前分节
-            if (!xsect_ptr->push_node(xnode_ptr))
+            if (xsect_ptr->push_node(xnode_ptr))
+            {
+                set_dirty(true);
+            }
+            else
             {
                 // 加入分节失败，可能是因为：
                 // 其为 键值 节点，与 分节 节点表中已有的 节点 索引键 冲突
@@ -1425,8 +1456,9 @@ protected:
      * @param [in ] xnew_ptr  : 新增分节。
      * @param [in ] xsect_ptr : 当前操作分节。
      * 
-     * @return xini_section_t *
+     * @return xini_section_t *s
      *         - 返回当前操作分节。
+     *         - 若返回值 != xnew_ptr 则表示操作失败，新增分节和内部分节重名。
      */
     xini_section_t * push_sect(xini_section_t * xnew_ptr,
                                xini_section_t * xsect_ptr)
@@ -1446,37 +1478,29 @@ protected:
             // 将新增分节作为当前操作分节返回
             xsect_ptr = xnew_ptr;
         }
-        else
+        else if (xfind_ptr != xsect_ptr)
         {
-            // 若存在同名分节，则新增分节直接删除掉
-            delete xnew_ptr;
+            // 将当前操作分节的节点表中的 尾部注释节点，
+            // 全部转移到同名分节的节点表后
 
-            if (xfind_ptr != xsect_ptr)
+            // 保证空行隔开
+            if (!xfind_ptr->has_end_nilline())
             {
-                // 将当前操作分节的节点表中的 尾部注释节点，
-                // 全部转移到同名分节的节点表后
-
-                // 保证空行隔开
-                if (!xfind_ptr->has_end_nilline())
-                {
-                    xfind_ptr->push_node(new xini_nilline_t(this));  
-                }
-
-                // 增加注释节点
-                xsect_ptr->pop_tail_comment(xfind_ptr->m_xlst_node, false);
-
-                // 保证空行隔开
-                if (!xfind_ptr->has_end_nilline())
-                {
-                    xfind_ptr->push_node(new xini_nilline_t(this));
-                }
-
-                // 将同名分节作为当前操作分节返回
-                xsect_ptr = xfind_ptr;
+                xfind_ptr->push_node(new xini_nilline_t(this));  
             }
-        }
 
-        set_dirty(true);
+            // 增加注释节点
+            xsect_ptr->pop_tail_comment(xfind_ptr->m_xlst_node, false);
+
+            // 保证空行隔开
+            if (!xfind_ptr->has_end_nilline())
+            {
+                xfind_ptr->push_node(new xini_nilline_t(this));
+            }
+
+            // 将同名分节作为当前操作分节返回
+            xsect_ptr = xfind_ptr;
+        }
 
         return xsect_ptr;
     }
