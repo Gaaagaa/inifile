@@ -242,8 +242,9 @@ class xini_node_t
 
     // constructor/destructor
 protected:
-    explicit xini_node_t(xini_ntype_t xini_ntype)
+    explicit xini_node_t(xini_ntype_t xini_ntype, xini_node_t * xowner_ptr)
         : m_xemt_ntype(xini_ntype)
+        , m_xowner_ptr(xowner_ptr)
     {
 
     }
@@ -261,6 +262,31 @@ public:
      */
     virtual const xini_node_t & operator >> (std::ostream & ostr) const = 0;
 
+    /**********************************************************/
+    /**
+     * @brief 脏标识。
+     */
+    virtual bool is_dirty(void)
+    {
+        if (nullptr != m_xowner_ptr)
+        {
+            return m_xowner_ptr->is_dirty();
+        }
+        return false;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 设置脏标识。
+     */
+    virtual void set_dirty(bool x_dirty)
+    {
+        if (nullptr != m_xowner_ptr)
+        {
+            m_xowner_ptr->set_dirty(x_dirty);
+        }
+    }
+
     // public interfaces
 public:
     /**********************************************************/
@@ -269,9 +295,16 @@ public:
      */
     inline xini_ntype_t ntype(void) const { return m_xemt_ntype; }
 
+    /**********************************************************/
+    /**
+     * @brief 获取节点的持有者。
+     */
+    inline xini_node_t * get_owner(void) const { return m_xowner_ptr; }
+
     // data members
 protected:
-    xini_ntype_t m_xemt_ntype;   ///< 节点类型
+    xini_ntype_t  m_xemt_ntype;   ///< 节点类型
+    xini_node_t * m_xowner_ptr;   ///< 节点持有者
 };
 
 /**********************************************************/
@@ -313,20 +346,21 @@ protected:
     /**
      * @brief 尝试使用字符串直接创建并初始化 xini_nilline_t 对象。
      */
-    static xini_node_t * try_create(const std::string & xstr_trim_line)
+    static xini_node_t * try_create(const std::string & xstr_trim_line,
+                                    xini_node_t * xowner_ptr)
     {
         if (!is_ntype(xstr_trim_line))
         {
             return nullptr;
         }
 
-        return (new xini_nilline_t());
+        return (new xini_nilline_t(xowner_ptr));
     }
 
     // construcor/destructor
 protected:
-    xini_nilline_t(void)
-        : xini_node_t(XINI_NTYPE_NILLINE)
+    xini_nilline_t(xini_node_t * xowner_ptr)
+        : xini_node_t(XINI_NTYPE_NILLINE, xowner_ptr)
     {
 
     }
@@ -377,22 +411,23 @@ protected:
     /**
      * @brief 尝试使用字符串直接创建并初始化 xini_comment_t 对象。
      */
-    static xini_node_t * try_create(const std::string & xstr_trim_line)
+    static xini_node_t * try_create(const std::string & xstr_trim_line,
+                                    xini_node_t * xowner_ptr)
     {
         if (!is_ntype(xstr_trim_line))
         {
             return nullptr;
         }
 
-        xini_comment_t * xnode_ptr = new xini_comment_t();
+        xini_comment_t * xnode_ptr = new xini_comment_t(xowner_ptr);
         xnode_ptr->m_xstr_text = xstr_trim_line;
         return xnode_ptr;
     }
 
     // construcor/destructor
 protected:
-    xini_comment_t(void)
-        : xini_node_t(XINI_NTYPE_COMMENT)
+    xini_comment_t(xini_node_t * xowner_ptr)
+        : xini_node_t(XINI_NTYPE_COMMENT, xowner_ptr)
     {
 
     }
@@ -459,7 +494,8 @@ protected:
     /**
      * @brief 尝试使用字符串直接创建并初始化 xini_keyvalue_t 对象。
      */
-    static xini_node_t * try_create(const std::string & xstr_trim_line)
+    static xini_node_t * try_create(const std::string & xstr_trim_line,
+                                    xini_node_t * xowner_ptr)
     {
         if (xstr_trim_line.empty())
         {
@@ -473,7 +509,7 @@ protected:
             return nullptr;
         }
 
-        xini_keyvalue_t * xnode_ptr = new xini_keyvalue_t();
+        xini_keyvalue_t * xnode_ptr = new xini_keyvalue_t(xowner_ptr);
 
         xnode_ptr->m_xstr_kname = xstr_trim_line.substr(0, st_eq);
         xnode_ptr->m_xstr_value = xstr_trim_line.substr(st_eq + 1);
@@ -486,8 +522,8 @@ protected:
 
     // construcor/destructor
 protected:
-    xini_keyvalue_t(void)
-        : xini_node_t(XINI_NTYPE_KEYVALUE)
+    xini_keyvalue_t(xini_node_t * xowner_ptr)
+        : xini_node_t(XINI_NTYPE_KEYVALUE, xowner_ptr)
     {
 
     }
@@ -585,21 +621,19 @@ public:
 
     xini_keyvalue_t & operator = (const std::string & x_value)
     {
-        m_xstr_value = x_value;
-        xstr_trim(m_xstr_value);
+        set_value(x_value);
         return *this;
     }
 
     xini_keyvalue_t & operator = (const char * x_value)
     {
-        m_xstr_value = x_value;
-        xstr_trim(m_xstr_value);
+        set_value(x_value);
         return *this;
     }
 
     xini_keyvalue_t & operator = (bool x_value)
     {
-        m_xstr_value = x_value ? "true" : "false";
+        set_value(x_value ? "true" : "false");
         return *this;
     }
 
@@ -607,7 +641,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -615,7 +649,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -623,7 +657,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -631,7 +665,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -639,7 +673,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -647,7 +681,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -655,7 +689,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -663,7 +697,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -671,7 +705,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -679,7 +713,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        m_xstr_value = ostr.str();
+        set_value(ostr.str());
         return *this;
     }
 
@@ -705,16 +739,23 @@ public:
 
     /**********************************************************/
     /**
-     * @brief 键值。
+     * @brief 设置键值。
      */
-    inline std::string & xvalue(void)
+    inline void set_value(const std::string & x_value)
     {
-        return m_xstr_value;
+        std::string xstr = x_value;
+        xstr_trim(xstr);
+
+        if (xstr != m_xstr_value)
+        {
+            m_xstr_value = x_value;
+            set_dirty(true);
+        }
     }
 
 protected:
-    std::string m_xstr_kname;  ///< 键名
-    std::string m_xstr_value;  ///< 键值
+    std::string   m_xstr_kname;  ///< 键名
+    std::string   m_xstr_value;  ///< 键值
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -747,14 +788,15 @@ protected:
     /**
      * @brief 尝试使用字符串直接创建并初始化 xini_section_t 对象。
      */
-    static xini_node_t * try_create(const std::string & xstr_trim_line)
+    static xini_node_t * try_create(const std::string & xstr_trim_line,
+                                    xini_node_t * xowner_ptr)
     {
         if (!is_ntype(xstr_trim_line))
         {
             return nullptr;
         }
 
-        xini_section_t * xnode_ptr = new xini_section_t();
+        xini_section_t * xnode_ptr = new xini_section_t(xowner_ptr);
         xnode_ptr->m_xstr_name = xstr_trim_line;
 
         xstr_rtrim(xnode_ptr->m_xstr_name, "]");
@@ -769,8 +811,8 @@ protected:
 
     // construcor/destructor
 protected:
-    xini_section_t(void)
-        : xini_node_t(XINI_NTYPE_SECTION)
+    xini_section_t(xini_node_t * xowner_ptr)
+        : xini_node_t(XINI_NTYPE_SECTION, xowner_ptr)
     {
 
     }
@@ -844,11 +886,13 @@ public:
 
         //======================================
 
-        xknode_ptr = static_cast< xini_keyvalue_t * >(
-                        xini_keyvalue_t::try_create(xstr_nkey + "="));
+        xknode_ptr =
+            static_cast< xini_keyvalue_t * >(
+                xini_keyvalue_t::try_create(xstr_nkey + "=", get_owner()));
         assert(nullptr != xknode_ptr);
 
         m_xlst_node.push_back(xknode_ptr);
+        set_dirty(true);
 
         //======================================
 
@@ -864,6 +908,20 @@ public:
     inline const std::string & name(void) const
     {
         return m_xstr_name;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 判断当前分节是否以空行结尾。
+     */
+    inline bool has_end_nilline(void)
+    {
+        if (!m_xlst_node.empty() &&
+            (XINI_NTYPE_NILLINE == m_xlst_node.back()->ntype()))
+        {
+            return true;
+        }
+        return false;
     }
 
     // inner invoking
@@ -957,17 +1015,25 @@ protected:
     {
         std::list< xini_node_t * > xlst_node;
 
+        size_t xst_line =  0;
+
         // 节点表只有三种类型的节点：键值，空行，注释，
         // 以及 另外加上 自身的 分节节点
 
-        while (m_xlst_node.size() > 0)
+        while (xst_line++ < m_xlst_node.size())
         {
             xini_node_t * xnode_ptr = m_xlst_node.back();
 
-            // 若遇到 空行节点，则终止后续操作
+            // 遇到空行节点
             if (XINI_NTYPE_NILLINE == xnode_ptr->ntype())
             {
-                break;
+                if (xst_line > 1)
+                    break;
+
+                // 只容许第一个是空行
+                xlst_node.push_front(xnode_ptr);
+                m_xlst_node.pop_back();
+                continue;
             }
 
             // 若反向遍历过程中，一直未遇到空行，
@@ -1010,6 +1076,7 @@ protected:
     }
 
 protected:
+    xini_node_t              * m_owner_ptr;  ///< 分节持有者（所属文件）
     std::string                m_xstr_name;  ///< 分节名称
     std::list< xini_node_t * > m_xlst_node;  ///< 分节下的节点表
 };
@@ -1029,22 +1096,23 @@ protected:
     /**
      * @brief 依据给定的 INI 文本行，创建相应的节点。
      */
-    static xini_node_t * make_node(const std::string & xstr_line)
+    static xini_node_t * make_node(const std::string & xstr_line,
+                                   xini_file_t * xowner_ptr)
     {
         xini_node_t * xnode_ptr = nullptr;
 
-#define XTRY_CREATE(nptr, node)                 \
-        do                                      \
-        {                                       \
-            nptr = node::try_create(xstr_line); \
-            if (nullptr != nptr)                \
-                return nptr;                    \
+#define XTRY_CREATE(nptr, node, owner)                 \
+        do                                             \
+        {                                              \
+            nptr = node::try_create(xstr_line, owner); \
+            if (nullptr != nptr)                       \
+                return nptr;                           \
         } while (0)
 
-        XTRY_CREATE(xnode_ptr, xini_nilline_t );
-        XTRY_CREATE(xnode_ptr, xini_comment_t );
-        XTRY_CREATE(xnode_ptr, xini_section_t );
-        XTRY_CREATE(xnode_ptr, xini_keyvalue_t);
+        XTRY_CREATE(xnode_ptr, xini_nilline_t , xowner_ptr);
+        XTRY_CREATE(xnode_ptr, xini_comment_t , xowner_ptr);
+        XTRY_CREATE(xnode_ptr, xini_section_t , xowner_ptr);
+        XTRY_CREATE(xnode_ptr, xini_keyvalue_t, xowner_ptr);
 
 #undef XTRY_CREATE
 
@@ -1054,13 +1122,14 @@ protected:
     // constructor/destructor
 public:
     xini_file_t(void)
-        : xini_node_t(XINI_NTYPE_FILEROOT)
+        : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
+        , m_xbt_dirty(false)
     {
 
     }
 
     xini_file_t(const std::string & xstr_filepath)
-        : xini_node_t(XINI_NTYPE_FILEROOT)
+        : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
     {
         open(xstr_filepath);
     }
@@ -1084,9 +1153,32 @@ public:
              ++itlst)
         {
             **itlst >> ostr;
+            if (!(*itlst)->has_end_nilline() &&
+                ((*itlst) != m_xlst_sect.back()))
+            {
+                ostr << std::endl;
+            }
         }
 
         return *this;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 脏标识。
+     */
+    virtual bool is_dirty(void)
+    {
+        return m_xbt_dirty;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 设置脏标识。
+     */
+    virtual void set_dirty(bool x_dirty)
+    {
+        m_xbt_dirty = x_dirty;
     }
 
     // overrides : operator
@@ -1105,14 +1197,19 @@ public:
         if (m_xlst_sect.empty())
         {
             // 当前分节表为空，则创建一个空分节名的 分节 节点
-
-            xsect_ptr = new xini_section_t();
+            xsect_ptr = new xini_section_t(this);
             m_xlst_sect.push_back(xsect_ptr);
         }
         else
         {
             // 取尾部分节作为当前操作的 分节 节点
             xsect_ptr = m_xlst_sect.back();
+
+            // 确保尾部分节空行结尾
+            if (!xsect_ptr->has_end_nilline())
+            {
+                xsect_ptr->push_node(new xini_nilline_t(this));
+            }
         }
 
         //======================================
@@ -1136,7 +1233,7 @@ public:
             //======================================
 
             // 创建节点
-            xini_node_t * xnode_ptr = make_node(xstr_line);
+            xini_node_t * xnode_ptr = make_node(xstr_line, this);
             if (nullptr == xnode_ptr)
             {
                 continue;
@@ -1191,8 +1288,9 @@ public:
 
         //======================================
 
-        xsect_ptr = static_cast< xini_section_t * >(
-                        xini_section_t::try_create("[" + xstr_name + "]"));
+        xsect_ptr =
+            static_cast< xini_section_t * >(
+                xini_section_t::try_create("[" + xstr_name + "]", this));
         assert(nullptr != xsect_ptr);
 
         m_xlst_sect.push_back(xsect_ptr);
@@ -1237,6 +1335,7 @@ public:
         m_xstr_path = xstr_filepath;
 
         *this << xfile_reader;
+        set_dirty(false);
 
         return true;
     }
@@ -1247,7 +1346,11 @@ public:
      */
     void close(void)
     {
-        dump(m_xstr_path);
+        if (is_dirty())
+        {
+            dump(m_xstr_path);
+            set_dirty(false);
+        }
         m_xstr_path.clear();
 
         for (std::list< xini_section_t * >::iterator
@@ -1354,22 +1457,18 @@ protected:
                 // 全部转移到同名分节的节点表后
 
                 // 保证空行隔开
-                if (!xfind_ptr->m_xlst_node.empty() &&
-                    (XINI_NTYPE_NILLINE !=
-                        xfind_ptr->m_xlst_node.back()->ntype()))
+                if (!xfind_ptr->has_end_nilline())
                 {
-                    xfind_ptr->push_node(new xini_nilline_t());  
+                    xfind_ptr->push_node(new xini_nilline_t(this));  
                 }
 
                 // 增加注释节点
                 xsect_ptr->pop_tail_comment(xfind_ptr->m_xlst_node, false);
 
                 // 保证空行隔开
-                if (!xfind_ptr->m_xlst_node.empty() &&
-                    (XINI_NTYPE_NILLINE !=
-                        xfind_ptr->m_xlst_node.back()->ntype()))
+                if (!xfind_ptr->has_end_nilline())
                 {
-                    xfind_ptr->push_node(new xini_nilline_t());  
+                    xfind_ptr->push_node(new xini_nilline_t(this));
                 }
 
                 // 将同名分节作为当前操作分节返回
@@ -1377,11 +1476,14 @@ protected:
             }
         }
 
+        set_dirty(true);
+
         return xsect_ptr;
     }
 
     // data members
 protected:
+    bool                          m_xbt_dirty;  ///< 脏标识
     std::string                   m_xstr_path;  ///< 文件路径
     std::list< xini_section_t * > m_xlst_sect;  ///< 文件根下的 分节 节点表
 };
