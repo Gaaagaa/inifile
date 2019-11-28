@@ -192,7 +192,6 @@ void test_ini_write(xini_file_t & xini_file)
     // add a string value
     xini_file["section3"]["NewText"] = "information";
 
-
     //======================================
     // section4
 
