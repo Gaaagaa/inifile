@@ -22,14 +22,12 @@
 
 /**
  * @file initest.cpp
- * <pre>
  * Copyright (c) 2019, Gaaagaa All rights reserved.
  * 
- * author  ：Gaaagaa
- * date    : 2019-11-26
- * version : 1.0.0.0
- * info    : for xini_file.h test program.
- * </pre>
+ * @author  ：Gaaagaa
+ * @date    : 2019-11-26
+ * @version : 1.0.0.0
+ * @brief   : for xini_file.h test program.
  */
 
 #include "xini_file.h"
