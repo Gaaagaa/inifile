@@ -25,9 +25,10 @@
  * <pre>
  * Copyright (c) 2019, Gaaagaa All rights reserved.
  * 
- * author ：Gaaagaa
- * date   : 2019-11-26
- * info   : ini file parser, read and write is supported.
+ * author  ：Gaaagaa
+ * date    : 2019-11-26
+ * version : 1.0.0.0
+ * info    : ini file parser, read and write is supported.
  * </pre>
  */
 
@@ -1412,10 +1413,19 @@ public:
     /**
      * @brief 判断对象是否已经打开。
      */
-    bool is_open(void) const
+    inline bool is_open(void) const
     {
         return (!m_xstr_path.empty() || !m_xlst_sect.empty());
     }
+
+    /**********************************************************/
+    /**
+     * @brief 当前关联的文件路径。
+     */
+    inline const std::string & filepath(void) const
+    {
+        return m_xstr_path;
+    } 
 
     /**********************************************************/
     /**
