@@ -22,14 +22,12 @@
 
 /**
  * @file xini_file.h
- * <pre>
  * Copyright (c) 2019, Gaaagaa All rights reserved.
  * 
- * author  ：Gaaagaa
- * date    : 2019-11-26
- * version : 1.0.0.0
- * info    : ini file parser, read and write is supported.
- * </pre>
+ * @author  ：Gaaagaa
+ * @date    : 2019-11-26
+ * @version : 1.0.0.0
+ * @brief   : ini file parser, read and write is supported.
  */
 
 #ifndef __XINI_FILE_H__
@@ -705,6 +703,7 @@ public:
     xini_keyvalue_t & operator = (float x_value)
     {
         std::ostringstream ostr;
+        ostr.precision(6);
         ostr << x_value;
         invk_set_value(ostr.str());
         return *this;
@@ -713,6 +712,7 @@ public:
     xini_keyvalue_t & operator = (double x_value)
     {
         std::ostringstream ostr;
+        ostr.precision(16);
         ostr << x_value;
         invk_set_value(ostr.str());
         return *this;
@@ -904,7 +904,6 @@ public:
         assert(nullptr != xknode_ptr);
 
         m_xlst_node.push_back(xknode_ptr);
-        set_dirty(true);
 
         //======================================
 
@@ -1425,7 +1424,16 @@ public:
     inline const std::string & filepath(void) const
     {
         return m_xstr_path;
-    } 
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 返回当前分节数量。
+     */
+    inline size_t sect_count(void) const
+    {
+        return m_xlst_sect.size();
+    }
 
     /**********************************************************/
     /**
