@@ -633,7 +633,7 @@ public:
 
     xini_keyvalue_t & operator = (bool x_value)
     {
-        set_value(x_value ? "true" : "false");
+        invk_set_value(x_value ? "true" : "false");
         return *this;
     }
 
@@ -641,7 +641,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -649,7 +649,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -657,7 +657,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -665,7 +665,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -673,7 +673,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -681,7 +681,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -689,7 +689,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -697,7 +697,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -705,7 +705,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -713,7 +713,7 @@ public:
     {
         std::ostringstream ostr;
         ostr << x_value;
-        set_value(ostr.str());
+        invk_set_value(ostr.str());
         return *this;
     }
 
@@ -743,12 +743,21 @@ public:
      */
     inline void set_value(const std::string & x_value)
     {
-        std::string xstr = x_value;
-        xstr_trim(xstr);
+        std::string xstr = x_value.substr(0, x_value.find_first_of("\r\n"));
+        invk_set_value(xstr_trim(xstr));
+    }
 
-        if (xstr != m_xstr_value)
+    // inner invoking
+protected:
+    /**********************************************************/
+    /**
+     * @brief 设置（单行文本 且 去除头尾空白字符 的）键值。
+     */
+    inline void invk_set_value(const std::string & xstr_single_line)
+    {
+        if (xstr_single_line != m_xstr_value)
         {
-            m_xstr_value = x_value;
+            m_xstr_value = xstr_single_line;
             set_dirty(true);
         }
     }
@@ -871,6 +880,8 @@ public:
      */
     xini_keyvalue_t & operator [] (const std::string & xstr_key)
     {
+        assert(xstr_is_single_line(xstr_key));
+
         //======================================
 
         std::string xstr_nkey = xstr_key;
@@ -1301,6 +1312,8 @@ public:
      */
     xini_section_t & operator [] (const std::string & xstr_sect)
     {
+        assert(xstr_is_single_line(xstr_sect));
+
         //======================================
 
         std::string xstr_name = xstr_sect;

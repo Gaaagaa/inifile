@@ -199,6 +199,12 @@ void test_ini_write(xini_file_t & xini_file)
     xini_file["section4"]["EmptyKey"];
     xini_file["section4"]["ValueKey"] = rand();
 
+    // test line break
+    xini_file["section4"]["LineBreak1"] = "ABCDEF\nGHIJKLMN";
+    xini_file["section4"]["LineBreak2"] = "ABCDEF\rGHIJKLMN";
+    xini_file["section4"]["LineBreak3"] = "ABCDEF\r7\nGHIJKLMN";
+    xini_file["section4"]["LineBreak4"] = "\rABCDEFGHIJKLMN";
+
     //======================================
 }
 
