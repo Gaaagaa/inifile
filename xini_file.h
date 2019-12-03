@@ -959,7 +959,7 @@ protected:
     /**
      * @brief 添加（空行、注释、键值 类型的）节点。
      * 
-     * @param[in ] xnode_ptr: （空行、注释、键值 类型的）节点。
+     * @param [in ] xnode_ptr: （空行、注释、键值 类型的）节点。
      * 
      * @return bool
      *         - 成功，返回 true ；
@@ -1000,7 +1000,7 @@ protected:
     /**
      * @brief 查找分节下的 键值 节点。
      * 
-     * @param[in ] xstr_xkey: 索引键字符串，比较时忽略大小写。
+     * @param [in ] xstr_xkey: 索引键字符串，比较时忽略大小写。
      * 
      * @return xini_keyvalue_t *
      *         - 成功，返回 对应的节点；
@@ -1034,8 +1034,8 @@ protected:
     /**
      * @brief 从 节点表 尾部取出 非当前 分节 下的注释节点（按 空行 节点作为分界）。
      * 
-     * @param[in ] xlst_comm : 接收返回的注释节点表（在链表头部添加返回的节点）。
-     * @param[in ] xbt_front : 表明操作是从 xlst_comm 前/后附加返回的节点。
+     * @param [in ] xlst_comm : 接收返回的注释节点表（在链表头部添加返回的节点）。
+     * @param [in ] xbt_front : 表明操作是从 xlst_comm 前/后附加返回的节点。
      * 
      * @return size_t
      *         - 返回取出的节点数量。
@@ -1350,7 +1350,7 @@ public:
     /**
      * @brief 打开文件。
      * 
-     * @param[in ] xstr_text : 文件路径。
+     * @param [in ] xstr_text : 文件路径。
      * 
      * @return bool
      *         - 成功，返回 true ；
