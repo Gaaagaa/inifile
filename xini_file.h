@@ -98,6 +98,8 @@ static inline bool xstr_is_single_line(const std::string & xstr)
     return (xstr.find_first_of("\r\n") == std::string::npos);
 }
 
+#if 0
+
 /**********************************************************/
 /**
 * @brief 字符串的比对操作。
@@ -110,7 +112,7 @@ static inline bool xstr_is_single_line(const std::string & xstr)
 *         - xszt_lcmp == xszt_rcmp，返回 ==  0；
 *         - xszt_lcmp >  xszt_rcmp，返回 >=  1；
 */
-int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
+static int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
 {
 	int xit_lvalue = 0;
 	int xit_rvalue = 0;
@@ -131,6 +133,8 @@ int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
 	return (xit_lvalue - xit_rvalue);
 }
 
+#endif
+
 /**********************************************************/
 /**
  * @brief 字符串忽略大小写的比对操作。
@@ -143,7 +147,7 @@ int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
  *         - xszt_lcmp == xszt_rcmp，返回 ==  0；
  *         - xszt_lcmp >  xszt_rcmp，返回 >=  1；
  */
-int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
+static int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
 {
 	int xit_lvalue = 0;
 	int xit_rvalue = 0;
