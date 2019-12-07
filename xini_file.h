@@ -269,7 +269,7 @@ public:
     /**
      * @brief 脏标识。
      */
-    virtual bool is_dirty(void)
+    virtual bool is_dirty(void) const
     {
         if (nullptr != m_xowner_ptr)
         {
@@ -1203,7 +1203,7 @@ public:
     /**
      * @brief 脏标识。
      */
-    virtual bool is_dirty(void)
+    virtual bool is_dirty(void) const
     {
         return m_xbt_dirty;
     }
