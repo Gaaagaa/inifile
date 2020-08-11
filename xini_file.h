@@ -207,7 +207,7 @@ static int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
  * 
  * 文件根：INI 文件的虚拟名称，不存在于文件内容中。
  * 空行：空白行，即便有空白字符占据，也算空白行。
- * 注释：以 “;” 开头后的内容，都算是注释内容。
+ * 注释：以 “;” 或者 “#” 开头后的内容，都算是注释内容。
  * 分节：格式为 “[section]” 。
  * 键值：格式为 “key=value” 。
  * </pre>
@@ -407,7 +407,9 @@ protected:
      */
     static bool is_ntype(const std::string & xstr_trim_line)
     {
-        return (!xstr_trim_line.empty() && (';' == xstr_trim_line.at(0)));
+        return (!xstr_trim_line.empty() &&
+                ((';' == xstr_trim_line.at(0)) ||
+                 ('#' == xstr_trim_line.at(0))));
     }
 
     /**********************************************************/
