@@ -27,7 +27,7 @@
  * @author  ：Gaaagaa
  * @date    : 2020-10-28
  * @version : 1.1.0.0
- * @brief   : update open()/close(), add operator()/try_value().
+ * @brief   : update load()/release(), add operator()/try_value().
  * 
  * @author  ：Gaaagaa
  * @date    : 2019-11-26
@@ -1165,12 +1165,12 @@ public:
         : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
         , m_xbt_dirty(false)
     {
-        open(xstr_filepath);
+        load(xstr_filepath);
     }
 
     virtual ~xini_file_t(void)
     {
-        close();
+        release();
     }
 
     // overrides
@@ -1355,7 +1355,7 @@ public:
     /**
      * @brief 从指定路径的文件中加载 INI 内容。
      * @note
-     *  open() 操作的成功与否，并不影响后续的键值读写操作，
+     *  load() 操作的成功与否，并不影响后续的键值读写操作，
      *  其只能标示 xini_file_t 对象是否关联可至指定路径
      *  （本地磁盘 或 远程网络 等的）文件。
      * 
@@ -1365,10 +1365,10 @@ public:
      *         - 成功，返回 true ；
      *         - 失败，返回 false。
      */
-    bool open(const std::string & xstr_filepath)
+    bool load(const std::string & xstr_filepath)
     {
-        // 先关闭当前对象
-        close();
+        // 先释放当前对象
+        release();
 
         // 不管后续操作是否成功，都关联到新指定的 INI 文件路径
         m_xstr_path = xstr_filepath;
@@ -1393,9 +1393,9 @@ public:
 
     /**********************************************************/
     /**
-     * @brief 关闭操作（可以不显示调用，对象析构函数中会自动调用该接口）。
+     * @brief 释放对象资源操作（可以不显示调用，对象析构函数中会自动调用该接口）。
      */
-    void close(void)
+    void release(void)
     {
         if (is_dirty())
         {
