@@ -1,6 +1,6 @@
-/**
+﻿/**
  * The MIT License (MIT)
- * Copyright (c) 2019, Gaaagaa All rights reserved.
+ * Copyright (c) 2019-2020, Gaaagaa All rights reserved.
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,7 +22,12 @@
 
 /**
  * @file xini_file.h
- * Copyright (c) 2019, Gaaagaa All rights reserved.
+ * Copyright (c) 2019-2020, Gaaagaa All rights reserved.
+ * 
+ * @author  ：Gaaagaa
+ * @date    : 2020-10-28
+ * @version : 1.1.0.0
+ * @brief   : update open()/close(), add operator()/try_value().
  * 
  * @author  ：Gaaagaa
  * @date    : 2019-11-26
@@ -114,23 +119,23 @@ static inline bool xstr_is_single_line(const std::string & xstr)
 */
 static int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
 {
-	int xit_lvalue = 0;
-	int xit_rvalue = 0;
+    int xit_lvalue = 0;
+    int xit_rvalue = 0;
 
-	if (xszt_lcmp == xszt_rcmp)
-		return 0;
-	if (NULL == xszt_lcmp)
-		return -1;
-	if (NULL == xszt_rcmp)
-		return 1;
+    if (xszt_lcmp == xszt_rcmp)
+        return 0;
+    if (NULL == xszt_lcmp)
+        return -1;
+    if (NULL == xszt_rcmp)
+        return 1;
 
-	do
-	{
-		xit_lvalue = (char)(*(xszt_lcmp++));
-		xit_rvalue = (char)(*(xszt_rcmp++));
-	} while (xit_lvalue && (xit_lvalue == xit_rvalue));
+    do
+    {
+        xit_lvalue = (char)(*(xszt_lcmp++));
+        xit_rvalue = (char)(*(xszt_rcmp++));
+    } while (xit_lvalue && (xit_lvalue == xit_rvalue));
 
-	return (xit_lvalue - xit_rvalue);
+    return (xit_lvalue - xit_rvalue);
 }
 
 #endif
@@ -149,27 +154,27 @@ static int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
  */
 static int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
 {
-	int xit_lvalue = 0;
-	int xit_rvalue = 0;
+    int xit_lvalue = 0;
+    int xit_rvalue = 0;
 
-	if (xszt_lcmp == xszt_rcmp)
-		return 0;
-	if (NULL == xszt_lcmp)
-		return -1;
-	if (NULL == xszt_rcmp)
-		return 1;
+    if (xszt_lcmp == xszt_rcmp)
+        return 0;
+    if (NULL == xszt_lcmp)
+        return -1;
+    if (NULL == xszt_rcmp)
+        return 1;
 
-	do
-	{
-		if (((xit_lvalue = (*(xszt_lcmp++))) >= 'A') && (xit_lvalue <= 'Z'))
-			xit_lvalue -= ('A' - 'a');
+    do
+    {
+        if (((xit_lvalue = (*(xszt_lcmp++))) >= 'A') && (xit_lvalue <= 'Z'))
+            xit_lvalue -= ('A' - 'a');
 
-		if (((xit_rvalue = (*(xszt_rcmp++))) >= 'A') && (xit_rvalue <= 'Z'))
-			xit_rvalue -= ('A' - 'a');
+        if (((xit_rvalue = (*(xszt_rcmp++))) >= 'A') && (xit_rvalue <= 'Z'))
+            xit_rvalue -= ('A' - 'a');
 
-	} while (xit_lvalue && (xit_lvalue == xit_rvalue));
+    } while (xit_lvalue && (xit_lvalue == xit_rvalue));
 
-	return (xit_lvalue - xit_rvalue);
+    return (xit_lvalue - xit_rvalue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -314,8 +319,8 @@ protected:
 /**
  * @brief 定义 xini_node_t 的流输出操作符函数。
  */
-inline std::ostream & operator << (std::ostream & ostr,
-                                   const xini_node_t & xini_node)
+inline std::ostream & operator << (
+    std::ostream & ostr, const xini_node_t & xini_node)
 {
     xini_node >> ostr;
     return ostr;
@@ -553,17 +558,85 @@ public:
         return *this;
     }
 
-    // operator
-public:
-	operator const std::string & () const
+    // template<> functions, for operators
+protected:
+    /**********************************************************/
+    /**
+     * @brief 整数值的读操作。
+     */
+    template< typename __integer_type >
+    __integer_type get_ivalue() const
     {
-        return m_xstr_value;
+#if __cplusplus < 201103L
+        return static_cast< __integer_type >(atol(m_xstr_value.c_str()));
+#else // __cplusplus >= 201103L
+        // atoll() 隶属于 C11 标准
+        return static_cast< __integer_type >(atoll(m_xstr_value.c_str()));
+#endif // __cplusplus < 201103L
     }
 
-	operator const char * () const
+    /**********************************************************/
+    /**
+     * @brief 实现带默认值的读操作。
+     */
+    template< typename __base_type >
+    __base_type get_default(__base_type x_default) const
     {
-        return m_xstr_value.c_str();
+        if (empty())
+            return x_default;
+        return this->operator __base_type();
     }
+
+    /**********************************************************/
+    /**
+     * @brief 整数值的写操作。
+     */
+    template< typename __integer_type >
+    xini_keyvalue_t & set_ivalue(__integer_type x_value)
+    {
+        std::ostringstream ostr;
+        ostr << x_value;
+        invk_set_value(ostr.str());
+        return *this;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 实现浮点值的写操作。
+     */
+    template< typename __float_type >
+    xini_keyvalue_t & set_fvalue(
+        __float_type x_value, std::streamsize x_precision)
+    {
+        std::ostringstream ostr;
+        ostr.precision(x_precision);
+        ostr << x_value;
+        invk_set_value(ostr.str());
+        return *this;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 若当前值为 空 时，则更新为指定的值，最后再返回键值。
+     */
+    template< typename __base_type >
+    __base_type try_set(__base_type x_value)
+    {
+        if (empty())
+        {
+            this->operator = (x_value);
+        }
+
+        return this->operator __base_type();
+    }
+
+    // operators
+public:
+    //======================================
+    // 基础数据类型的读操作
+
+    operator const std::string & () const { return m_xstr_value;         }
+    operator const char *        () const { return m_xstr_value.c_str(); }
 
     operator bool () const
     {
@@ -574,155 +647,71 @@ public:
         return (0 != this->operator int());
     }
 
-	operator short () const
-    {
-        return (short)atoi(m_xstr_value.c_str());
-    }
+    operator short              () const { return get_ivalue< short              >(); }
+    operator unsigned short     () const { return get_ivalue< unsigned short     >(); }
+    operator int                () const { return get_ivalue< int                >(); }
+    operator unsigned int       () const { return get_ivalue< unsigned int       >(); }
+    operator long               () const { return get_ivalue< long               >(); }
+    operator unsigned long      () const { return get_ivalue< unsigned long      >(); }
+    operator long long          () const { return get_ivalue< long long          >(); }
+    operator unsigned long long () const { return get_ivalue< unsigned long long >(); }
 
-	operator unsigned short () const
-    {
-        return (unsigned short)this->operator short();
-    }
+    operator float  () const { return static_cast< float >(this->operator double()); }
+    operator double () const { return atof(m_xstr_value.c_str());                    }
 
-	operator int () const
-    {
-        return atoi(m_xstr_value.c_str());
-    }
+    //======================================
+    // 重载 operator ()，实现带上默认值的读操作
 
-	operator unsigned int () const
-    {
-        return (unsigned int)this->operator int();
-    }
+    const std::string & operator () (const std::string & x_default) const { return get_default< const std::string & >(x_default); }
+    const char *        operator () (const char *        x_default) const { return get_default< const char *        >(x_default); }
+    bool                operator () (bool                x_default) const { return get_default< bool                >(x_default); }
+    short               operator () (short               x_default) const { return get_default< short               >(x_default); }
+    unsigned short      operator () (unsigned short      x_default) const { return get_default< unsigned short      >(x_default); }
+    int                 operator () (int                 x_default) const { return get_default< int                 >(x_default); }
+    unsigned int        operator () (unsigned int        x_default) const { return get_default< unsigned int        >(x_default); }
+    long                operator () (long                x_default) const { return get_default< long                >(x_default); }
+    unsigned long       operator () (unsigned long       x_default) const { return get_default< unsigned long       >(x_default); }
+    long long           operator () (long long           x_default) const { return get_default< long long           >(x_default); }
+    unsigned long long  operator () (unsigned long long  x_default) const { return get_default< unsigned long long  >(x_default); }
+    float               operator () (float               x_default) const { return get_default< float               >(x_default); }
+    double              operator () (double              x_default) const { return get_default< double              >(x_default); }
 
-    operator long () const
-    {
-        return atol(m_xstr_value.c_str());
-    }
+    //======================================
+    // 与重载的 operator () 操作符功能类似，
+    // 但会使用默认值更新空键值
 
-    operator unsigned long () const
-    {
-        return (unsigned long)this->operator long();
-    }
+    const std::string & try_value(const std::string & x_default) { return try_set< const std::string & >(x_default); }
+    const char *        try_value(const char *        x_default) { return try_set< const char *        >(x_default); }
+    bool                try_value(bool                x_default) { return try_set< bool                >(x_default); }
+    short               try_value(short               x_default) { return try_set< short               >(x_default); }
+    unsigned short      try_value(unsigned short      x_default) { return try_set< unsigned short      >(x_default); }
+    int                 try_value(int                 x_default) { return try_set< int                 >(x_default); }
+    unsigned int        try_value(unsigned int        x_default) { return try_set< unsigned int        >(x_default); }
+    long                try_value(long                x_default) { return try_set< long                >(x_default); }
+    unsigned long       try_value(unsigned long       x_default) { return try_set< unsigned long       >(x_default); }
+    long long           try_value(long long           x_default) { return try_set< long long           >(x_default); }
+    unsigned long long  try_value(unsigned long long  x_default) { return try_set< unsigned long long  >(x_default); }
+    float               try_value(float               x_default) { return try_set< float               >(x_default); }
+    double              try_value(double              x_default) { return try_set< double              >(x_default); }
 
-    operator long long () const
-    {
-        return atoll(m_xstr_value.c_str());
-    }
+    //======================================
+    // 基础数据类型的写操作
 
-    operator unsigned long long () const
-    {
-        return (unsigned long long)this->operator long long();
-    }
+    xini_keyvalue_t & operator = (const std::string & x_value) { set_value(x_value); return *this; }
+    xini_keyvalue_t & operator = (const char *        x_value) { set_value(x_value); return *this; }
+    xini_keyvalue_t & operator = (bool x_value) { invk_set_value(x_value ? "true" : "false"); return *this; }
+    xini_keyvalue_t & operator = (short              x_value) { return set_ivalue< short              >(x_value); }
+    xini_keyvalue_t & operator = (unsigned short     x_value) { return set_ivalue< unsigned short     >(x_value); }
+    xini_keyvalue_t & operator = (int                x_value) { return set_ivalue< int                >(x_value); }
+    xini_keyvalue_t & operator = (unsigned int       x_value) { return set_ivalue< unsigned int       >(x_value); }
+    xini_keyvalue_t & operator = (long               x_value) { return set_ivalue< long               >(x_value); }
+    xini_keyvalue_t & operator = (unsigned long      x_value) { return set_ivalue< unsigned long      >(x_value); }
+    xini_keyvalue_t & operator = (long long          x_value) { return set_ivalue< long long          >(x_value); }
+    xini_keyvalue_t & operator = (unsigned long long x_value) { return set_ivalue< unsigned long long >(x_value); }
+    xini_keyvalue_t & operator = (float  x_value) { return set_fvalue(x_value,  6); }
+    xini_keyvalue_t & operator = (double x_value) { return set_fvalue(x_value, 16); }
 
-	operator float () const
-    {
-        return strtof(m_xstr_value.c_str(), nullptr);
-    }
-
-    operator double () const
-    {
-        return atof(m_xstr_value.c_str());
-    }
-
-    xini_keyvalue_t & operator = (const std::string & x_value)
-    {
-        set_value(x_value);
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (const char * x_value)
-    {
-        set_value(x_value);
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (bool x_value)
-    {
-        invk_set_value(x_value ? "true" : "false");
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (short x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (unsigned short x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (int x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (unsigned int x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (long x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (unsigned long x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (long long x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (unsigned long long x_value)
-    {
-        std::ostringstream ostr;
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (float x_value)
-    {
-        std::ostringstream ostr;
-        ostr.precision(6);
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
-
-    xini_keyvalue_t & operator = (double x_value)
-    {
-        std::ostringstream ostr;
-        ostr.precision(16);
-        ostr << x_value;
-        invk_set_value(ostr.str());
-        return *this;
-    }
+    //======================================
 
     // public interfaces
 public:
@@ -742,6 +731,15 @@ public:
     inline const std::string & xvalue(void) const
     {
         return m_xstr_value;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 判断 键值 是否为 空。
+     */
+    inline bool empty(void) const
+    {
+        return m_xstr_value.empty();
     }
 
     /**********************************************************/
@@ -1165,6 +1163,7 @@ public:
 
     xini_file_t(const std::string & xstr_filepath)
         : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
+        , m_xbt_dirty(false)
     {
         open(xstr_filepath);
     }
@@ -1354,7 +1353,11 @@ public:
 public:
     /**********************************************************/
     /**
-     * @brief 打开文件。
+     * @brief 从指定路径的文件中加载 INI 内容。
+     * @note
+     *  open() 操作的成功与否，并不影响后续的键值读写操作，
+     *  其只能标示 xini_file_t 对象是否关联可至指定路径
+     *  （本地磁盘 或 远程网络 等的）文件。
      * 
      * @param [in ] xstr_text : 文件路径。
      * 
@@ -1364,11 +1367,11 @@ public:
      */
     bool open(const std::string & xstr_filepath)
     {
-        // 若当前对象处于打开状态，则先关闭
-        if (is_open())
-        {
-            close();
-        }
+        // 先关闭当前对象
+        close();
+
+        // 不管后续操作是否成功，都关联到新指定的 INI 文件路径
+        m_xstr_path = xstr_filepath;
 
         if (xstr_filepath.empty())
         {
@@ -1382,8 +1385,6 @@ public:
             return false;
         }
 
-        m_xstr_path = xstr_filepath;
-
         *this << xfile_reader;
         set_dirty(false);
 
@@ -1392,7 +1393,7 @@ public:
 
     /**********************************************************/
     /**
-     * @brief 关闭文件（可以不显示调用，对象析构函数中会自动调用该接口）。
+     * @brief 关闭操作（可以不显示调用，对象析构函数中会自动调用该接口）。
      */
     void close(void)
     {
@@ -1412,15 +1413,6 @@ public:
         }
 
         m_xlst_sect.clear();
-    }
-
-    /**********************************************************/
-    /**
-     * @brief 判断对象是否已经打开。
-     */
-    inline bool is_open(void) const
-    {
-        return (!m_xstr_path.empty() || !m_xlst_sect.empty());
     }
 
     /**********************************************************/
@@ -1447,13 +1439,9 @@ public:
      */
     bool dump(const std::string & xstr_filepath)
     {
-        if (!is_open() || xstr_filepath.empty())
-        {
-            return false;
-        }
-
         // 打开文件
-        std::ofstream xfile_writer(xstr_filepath.c_str());
+        std::ofstream xfile_writer(
+            xstr_filepath.c_str(), std::ios_base::trunc);
         if (!xfile_writer.is_open())
         {
             return false;
@@ -1493,7 +1481,7 @@ protected:
      * @param [in ] xnew_ptr  : 新增分节。
      * @param [in ] xsect_ptr : 当前操作分节。
      * 
-     * @return xini_section_t *s
+     * @return xini_section_t *
      *         - 返回当前操作分节。
      *         - 若返回值 != xnew_ptr 则表示操作失败，新增分节和内部分节重名。
      */
@@ -1553,8 +1541,8 @@ protected:
 /**
  * @brief 定义 xini_file_t 的流输入操作符函数。
  */
-inline std::istream & operator >> (std::istream & istr,
-                                   xini_file_t & xini_file)
+inline std::istream & operator >> (
+    std::istream & istr, xini_file_t & xini_file)
 {
     xini_file << istr;
     return istr;
