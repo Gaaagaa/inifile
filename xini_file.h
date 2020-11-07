@@ -25,6 +25,11 @@
  * Copyright (c) 2019-2020, Gaaagaa All rights reserved.
  * 
  * @author  ：Gaaagaa
+ * @date    : 2020-11-07
+ * @version : 1.2.0.0
+ * @brief   : Improved retrieval performance of the operator[].
+ * 
+ * @author  ：Gaaagaa
  * @date    : 2020-10-28
  * @version : 1.1.0.0
  * @brief   : update load()/release(), add operator()/try_value().
@@ -40,6 +45,7 @@
 
 #include <stdlib.h>
 #include <list>
+#include <map>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -176,6 +182,24 @@ static int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
 
     return (xit_lvalue - xit_rvalue);
 }
+
+/**
+ * @struct xstr_icmp_t
+ * @brief  as functor.
+ */
+struct xstr_icmp_t
+{
+    typedef std::string first_argument_type;
+    typedef std::string second_argument_type;
+    typedef bool        result_type;
+
+    bool operator () (
+        const std::string & xstr_left,
+        const std::string & xstr_right) const
+    {
+        return (xstr_icmp(xstr_left.c_str(), xstr_right.c_str()) < 0);
+    }
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // xini_node_t : INI 节点的抽象定义
@@ -783,6 +807,11 @@ class xini_section_t : public xini_node_t
 {
     friend class xini_file_t;
 
+    // common data types
+protected:
+    typedef std::list< xini_node_t * >                              xlst_node_t;
+    typedef std::map< std::string, xini_keyvalue_t *, xstr_icmp_t > xmap_ndkv_t;
+
     // common invoking
 protected:
     /**********************************************************/
@@ -817,7 +846,11 @@ protected:
         xstr_ltrim(xnode_ptr->m_xstr_name, "[");
         xstr_trim(xnode_ptr->m_xstr_name);
 
-        // 将自身作为节点加入到节点表中
+        // 将 自身 作为 节点 加入到 m_xlst_node 中，但并不意味着 m_xlst_node 
+        // 的 首个节点 就一定是 自身节点，因为 xini_file_t 在加载过程中，
+        // 会调用 pop_tail_comment() 操作，这有可能在 m_xlst_node 前端新增
+        // 一些 注释/空行节点。所以在进行 流输出 操作时，自身节点 则可起到 占位行
+        // 的作用，详细过程可参看 operator >> 的实现流程
         xnode_ptr->m_xlst_node.push_back(xnode_ptr);
 
         return xnode_ptr;
@@ -845,6 +878,7 @@ protected:
         }
 
         m_xlst_node.clear();
+        m_xmap_ndkv.clear();
     }
 
     // overrides
@@ -901,6 +935,9 @@ public:
         }
 
         //======================================
+        // 若索引的 键值节点 并未在节点表中，
+        // 则 新增 此 键值节点，但并不设置 脏标识，
+        // 避免存储不必要的 空键值节点
 
         xknode_ptr =
             static_cast< xini_keyvalue_t * >(
@@ -908,6 +945,7 @@ public:
         assert(nullptr != xknode_ptr);
 
         m_xlst_node.push_back(xknode_ptr);
+        m_xmap_ndkv.insert(std::make_pair(xstr_nkey, xknode_ptr));
 
         //======================================
 
@@ -994,6 +1032,7 @@ protected:
             }
 
             m_xlst_node.push_back(xnode_ptr);
+            m_xmap_ndkv.insert(std::make_pair(xnode_kvptr->xkey(), xnode_kvptr));
             return true;
         }
 
@@ -1012,6 +1051,7 @@ protected:
      */
     xini_keyvalue_t * find_knode(const std::string & xstr_xkey) const
     {
+#if 0
         for (std::list< xini_node_t * >::const_iterator
              itlst = m_xlst_node.begin();
              itlst != m_xlst_node.end();
@@ -1030,7 +1070,13 @@ protected:
                 return xnode_ptr;
             }
         }
-
+#else
+        xmap_ndkv_t::const_iterator itfind = m_xmap_ndkv.find(xstr_xkey);
+        if (itfind != m_xmap_ndkv.end())
+        {
+            return itfind->second;
+        }
+#endif
         return nullptr;
     }
 
@@ -1110,8 +1156,9 @@ protected:
     }
 
 protected:
-    std::string                m_xstr_name;  ///< 分节名称
-    std::list< xini_node_t * > m_xlst_node;  ///< 分节下的节点表
+    std::string   m_xstr_name;  ///< 分节名称
+    xlst_node_t   m_xlst_node;  ///< 分节下的节点表
+    xmap_ndkv_t   m_xmap_ndkv;  ///< 分节下的 键值节点 映射表
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1123,6 +1170,11 @@ protected:
  */
 class xini_file_t : public xini_node_t
 {
+    // common data types
+protected:
+    typedef std::list< xini_section_t * >                          xlst_section_t;
+    typedef std::map< std::string, xini_section_t *, xstr_icmp_t > xmap_section_t;
+
     // common invoking
 protected:
     /**********************************************************/
@@ -1236,6 +1288,9 @@ public:
             // 当前分节表为空，则创建一个空分节名的 分节 节点
             xsect_ptr = new xini_section_t(this);
             m_xlst_sect.push_back(xsect_ptr);
+
+            assert(m_xmap_sect.empty());
+            m_xmap_sect.insert(std::make_pair(std::string(""), xsect_ptr));
         }
         else
         {
@@ -1336,6 +1391,9 @@ public:
         }
 
         //======================================
+        // 若索引的分节并未在 分节 的节点表中，
+        // 则 新增 此分节，但并不设置 脏标识，
+        // 避免存储不必要的  空分节
 
         xsect_ptr =
             static_cast< xini_section_t * >(
@@ -1343,6 +1401,7 @@ public:
         assert(nullptr != xsect_ptr);
 
         m_xlst_sect.push_back(xsect_ptr);
+        m_xmap_sect.insert(std::make_pair(xstr_name, xsect_ptr));
 
         //======================================
 
@@ -1413,6 +1472,7 @@ public:
         }
 
         m_xlst_sect.clear();
+        m_xmap_sect.clear();
     }
 
     /**********************************************************/
@@ -1459,6 +1519,7 @@ protected:
      */
     xini_section_t * find_sect(const std::string & xstr_sect) const
     {
+#if 0
         for (std::list< xini_section_t * >::const_iterator
                 itlst = m_xlst_sect.begin();
              itlst != m_xlst_sect.end();
@@ -1470,7 +1531,13 @@ protected:
                 return (*itlst);
             }
         }
-
+#else
+        xmap_section_t::const_iterator itfind = m_xmap_sect.find(xstr_sect);
+        if (itfind != m_xmap_sect.end())
+        {
+            return itfind->second;
+        }
+#endif
         return nullptr;
     }
 
@@ -1495,6 +1562,7 @@ protected:
         {
             // 不存在同名分节，则将新增分节加入到节点表尾部
             m_xlst_sect.push_back(xnew_ptr);
+            m_xmap_sect.insert(std::make_pair(xnew_ptr->name(), xnew_ptr));
 
             // 将当前操作分节的节点表中的 尾部注释节点，
             // 全部转移到新增分节的节点表前
@@ -1532,9 +1600,10 @@ protected:
 
     // data members
 protected:
-    bool                          m_xbt_dirty;  ///< 脏标识
-    std::string                   m_xstr_path;  ///< 文件路径
-    std::list< xini_section_t * > m_xlst_sect;  ///< 文件根下的 分节 节点表
+    bool              m_xbt_dirty;  ///< 脏标识
+    std::string       m_xstr_path;  ///< 文件路径
+    xlst_section_t    m_xlst_sect;  ///< 文件根下的 分节 节点表
+    xmap_section_t    m_xmap_sect;  ///< 各个 分节 的节点映射表
 };
 
 /**********************************************************/
