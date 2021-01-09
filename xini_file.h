@@ -25,6 +25,12 @@
  * Copyright (c) 2019-2020, Gaaagaa All rights reserved.
  * 
  * @author  ：Gaaagaa
+ * @date    : 2021-01-09
+ * @version : 1.2.0.1
+ * @brief   : `this->operator __base_type()`, gcc not supported.
+ * @note    : Sepecial thanks for (qinwanlin)[https://gitee.com/qinwanlin].
+ * 
+ * @author  ：Gaaagaa
  * @date    : 2020-11-07
  * @version : 1.2.0.0
  * @brief   : Improved retrieval performance of the operator[].
@@ -608,7 +614,7 @@ protected:
     {
         if (empty())
             return x_default;
-        return this->operator __base_type();
+        return (__base_type)(*this);
     }
 
     /**********************************************************/
@@ -651,7 +657,7 @@ protected:
             this->operator = (x_value);
         }
 
-        return this->operator __base_type();
+        return (__base_type)(*this);
     }
 
     // operators
