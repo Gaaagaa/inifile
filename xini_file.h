@@ -1450,6 +1450,19 @@ public:
             return false;
         }
 
+        // 跳过字符流的头部编码信息（如 utf-8 的 bom 标识）
+        while (!xfile_reader.eof())
+        {
+            int xchar = xfile_reader.get();
+            if (std::iscntrl(xchar) || std::isprint(xchar))
+            {
+                xfile_reader.putback(static_cast< char >(xchar));
+                break;
+            }
+
+            m_xstr_head.push_back(static_cast< char >(xchar));
+        }
+
         *this << xfile_reader;
         set_dirty(false);
 
@@ -1468,6 +1481,7 @@ public:
             set_dirty(false);
         }
         m_xstr_path.clear();
+        m_xstr_head.clear();
 
         for (std::list< xini_section_t * >::iterator
                 itlst = m_xlst_sect.begin();
@@ -1513,7 +1527,10 @@ public:
             return false;
         }
 
+        if (!m_xstr_head.empty())
+            xfile_writer << m_xstr_head.c_str();
         *this >> xfile_writer;
+
         return true;
     }
 
@@ -1608,6 +1625,7 @@ protected:
 protected:
     bool              m_xbt_dirty;  ///< 脏标识
     std::string       m_xstr_path;  ///< 文件路径
+    std::string       m_xstr_head;  ///< 用于存储文件头的编码字符信息（如 utf-8 的 bom 标识）
     xlst_section_t    m_xlst_sect;  ///< 文件根下的 分节 节点表
     xmap_section_t    m_xmap_sect;  ///< 各个 分节 的节点映射表
 };
