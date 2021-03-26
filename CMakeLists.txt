@@ -1,9 +1,7 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0)
 
-PROJECT(initest VERSION 1.0.0.0)
+project(initest VERSION 1.0.0.0)
 
-SET(SRC_LIST
-    initest.cpp
-    )
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${SRC_LIST})
+add_executable(ini_test ini_test.cpp)
