@@ -59,12 +59,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#if __cplusplus < 201103L
-#define nullptr  0
-#endif // __cplusplus < 201103L
-
-////////////////////////////////////////////////////////////////////////////////
-
 /** 空白字符集 */
 static const char xspace_chars[] = " \t\n\r\f\v";
 
@@ -306,7 +300,7 @@ public:
      */
     virtual bool is_dirty(void) const
     {
-        if (nullptr != m_xowner_ptr)
+        if (NULL != m_xowner_ptr)
         {
             return m_xowner_ptr->is_dirty();
         }
@@ -319,7 +313,7 @@ public:
      */
     virtual void set_dirty(bool x_dirty)
     {
-        if (nullptr != m_xowner_ptr)
+        if (NULL != m_xowner_ptr)
         {
             m_xowner_ptr->set_dirty(x_dirty);
         }
@@ -389,7 +383,7 @@ protected:
     {
         if (!is_ntype(xstr_trim_line))
         {
-            return nullptr;
+            return NULL;
         }
 
         return (new xini_nilline_t(xowner_ptr));
@@ -456,7 +450,7 @@ protected:
     {
         if (!is_ntype(xstr_trim_line))
         {
-            return nullptr;
+            return NULL;
         }
 
         xini_comment_t * xnode_ptr = new xini_comment_t(xowner_ptr);
@@ -539,14 +533,14 @@ protected:
     {
         if (xstr_trim_line.empty())
         {
-            return nullptr;
+            return NULL;
         }
 
         // 等号位置
         size_t st_eq = xstr_trim_line.find('=');
         if ((0 == st_eq) || (std::string::npos == st_eq))
         {
-            return nullptr;
+            return NULL;
         }
 
         xini_keyvalue_t * xnode_ptr = new xini_keyvalue_t(xowner_ptr);
@@ -845,7 +839,7 @@ protected:
     {
         if (!is_ntype(xstr_trim_line))
         {
-            return nullptr;
+            return NULL;
         }
 
         xini_section_t * xnode_ptr = new xini_section_t(xowner_ptr);
@@ -938,7 +932,7 @@ public:
         //======================================
 
         xini_keyvalue_t * xknode_ptr = find_knode(xstr_nkey);
-        if (nullptr != xknode_ptr)
+        if (NULL != xknode_ptr)
         {
             return *xknode_ptr;
         }
@@ -951,7 +945,7 @@ public:
         xknode_ptr =
             static_cast< xini_keyvalue_t * >(
                 xini_keyvalue_t::try_create(xstr_nkey + "=", get_owner()));
-        assert(nullptr != xknode_ptr);
+        assert(NULL != xknode_ptr);
 
         m_xlst_node.push_back(xknode_ptr);
         m_xmap_ndkv.insert(std::make_pair(xstr_nkey, xknode_ptr));
@@ -1102,7 +1096,7 @@ protected:
      */
     bool push_node(xini_node_t * xnode_ptr)
     {
-        if (nullptr == xnode_ptr)
+        if (NULL == xnode_ptr)
         {
             return false;
         }
@@ -1119,7 +1113,7 @@ protected:
             xini_keyvalue_t * xnode_kvptr =
                     static_cast< xini_keyvalue_t * >(xnode_ptr);
 
-            if (nullptr != find_knode(xnode_kvptr->xkey()))
+            if (NULL != find_knode(xnode_kvptr->xkey()))
             {
                 return false;
             }
@@ -1140,7 +1134,7 @@ protected:
      * 
      * @return xini_keyvalue_t *
      *         - 成功，返回 对应的节点；
-     *         - 失败，返回 nullptr 。
+     *         - 失败，返回 NULL 。
      */
     xini_keyvalue_t * find_knode(const std::string & xstr_xkey) const
     {
@@ -1170,7 +1164,7 @@ protected:
             return itfind->second;
         }
 #endif
-        return nullptr;
+        return NULL;
     }
 
     /**********************************************************/
@@ -1277,13 +1271,13 @@ protected:
     static xini_node_t * make_node(const std::string & xstr_line,
                                    xini_file_t * xowner_ptr)
     {
-        xini_node_t * xnode_ptr = nullptr;
+        xini_node_t * xnode_ptr = NULL;
 
 #define XTRY_CREATE(nptr, node, owner)                 \
         do                                             \
         {                                              \
             nptr = node::try_create(xstr_line, owner); \
-            if (nullptr != nptr)                       \
+            if (NULL != nptr)                       \
                 return nptr;                           \
         } while (0)
 
@@ -1300,14 +1294,14 @@ protected:
     // constructor/destructor
 public:
     xini_file_t(void)
-        : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
+        : xini_node_t(XINI_NTYPE_FILEROOT, NULL)
         , m_xbt_dirty(false)
     {
 
     }
 
     xini_file_t(const std::string & xstr_filepath)
-        : xini_node_t(XINI_NTYPE_FILEROOT, nullptr)
+        : xini_node_t(XINI_NTYPE_FILEROOT, NULL)
         , m_xbt_dirty(false)
     {
         load(xstr_filepath);
@@ -1374,7 +1368,7 @@ public:
         //======================================
 
         // 记录当前操作的分节
-        xini_section_t * xsect_ptr = nullptr;
+        xini_section_t * xsect_ptr = NULL;
 
         if (m_xlst_sect.empty())
         {
@@ -1419,7 +1413,7 @@ public:
 
             // 创建节点
             xini_node_t * xnode_ptr = make_node(xstr_line, this);
-            if (nullptr == xnode_ptr)
+            if (NULL == xnode_ptr)
             {
                 continue;
             }
@@ -1478,7 +1472,7 @@ public:
         //======================================
 
         xini_section_t * xsect_ptr = find_sect(xstr_name);
-        if (nullptr != xsect_ptr)
+        if (NULL != xsect_ptr)
         {
             return *xsect_ptr;
         }
@@ -1491,7 +1485,7 @@ public:
         xsect_ptr =
             static_cast< xini_section_t * >(
                 xini_section_t::try_create("[" + xstr_name + "]", this));
-        assert(nullptr != xsect_ptr);
+        assert(NULL != xsect_ptr);
 
         m_xlst_sect.push_back(xsect_ptr);
         m_xmap_sect.insert(std::make_pair(xstr_name, xsect_ptr));
@@ -1648,7 +1642,7 @@ protected:
             return itfind->second;
         }
 #endif
-        return nullptr;
+        return NULL;
     }
 
     /**********************************************************/
@@ -1668,7 +1662,7 @@ protected:
         // 查找同名分节
         xini_section_t * xfind_ptr = find_sect(xnew_ptr->name());
 
-        if (nullptr == xfind_ptr)
+        if (NULL == xfind_ptr)
         {
             // 不存在同名分节，则将新增分节加入到节点表尾部
             m_xlst_sect.push_back(xnew_ptr);
