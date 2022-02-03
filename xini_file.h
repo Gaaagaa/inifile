@@ -63,7 +63,7 @@
 #define nullptr  0
 #endif // __cplusplus < 201103L
 
-/////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /** 空白字符集 */
 static const char xspace_chars[] = " \t\n\r\f\v";
@@ -817,6 +817,9 @@ class xini_section_t : public xini_node_t
 protected:
     typedef std::list< xini_node_t * >                              xlst_node_t;
     typedef std::map< std::string, xini_keyvalue_t *, xstr_icmp_t > xmap_ndkv_t;
+public:
+    typedef xlst_node_t::iterator       iterator;
+    typedef xlst_node_t::const_iterator const_iterator;
 
     // common invoking
 protected:
@@ -999,6 +1002,90 @@ public:
             return true;
         }
         return false;
+    }
+
+    // iterator
+public:
+    /**********************************************************/
+    /**
+     * @brief 节点表的起始位置迭代器。
+     */
+    inline iterator begin(void) { return m_xlst_node.begin(); }
+
+    /**********************************************************/
+    /**
+     * @brief 节点表的起始位置迭代器。
+     */
+    inline const_iterator begin(void) const { return m_xlst_node.begin(); }
+
+    /**********************************************************/
+    /**
+     * @brief 节点表的结束位置迭代器。
+     */
+    inline iterator end(void) { return m_xlst_node.end(); }
+
+    /**********************************************************/
+    /**
+     * @brief 节点表的结束位置迭代器。
+     */
+    inline const_iterator end(void) const { return m_xlst_node.end(); }
+
+    /**********************************************************/
+    /**
+     * @brief 返回节点表中 首个 键值节点 的迭代器。
+     */
+    inline iterator begin_kv(void)
+    {
+        iterator xiter = m_xlst_node.begin();
+        if (XINI_NTYPE_KEYVALUE == (*xiter)->ntype())
+            return xiter;
+        return next_kv(xiter);
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 返回节点表中 首个 键值节点 的迭代器。
+     */
+    inline const_iterator begin_kv(void) const
+    {
+        const_iterator xiter = m_xlst_node.begin();
+        if (XINI_NTYPE_KEYVALUE == (*xiter)->ntype())
+            return xiter;
+        return next_kv(xiter);
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 返回 下一个 键值节点 的迭代器。
+     */
+    iterator next_kv(iterator xiter)
+    {
+        const iterator xiter_end = m_xlst_node.end();
+        if (xiter != xiter_end)
+        {
+            while (++xiter != xiter_end)
+                if (XINI_NTYPE_KEYVALUE == (*xiter)->ntype())
+                    return xiter;
+        }
+
+        return xiter_end;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 返回 下一个 键值节点 的迭代器。
+     */
+    const_iterator next_kv(const_iterator xiter) const
+    {
+        const const_iterator xiter_end = m_xlst_node.end();
+        if (xiter != xiter_end)
+        {
+            while (++xiter != xiter_end)
+                if (XINI_NTYPE_KEYVALUE == (*xiter)->ntype())
+                    return xiter;
+        }
+
+        return xiter_end;
     }
 
     // inner invoking
