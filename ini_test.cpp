@@ -1,4 +1,4 @@
-/**
+﻿/**
  * The MIT License (MIT)
  * Copyright (c) Gaaagaa. All rights reserved.
  * 
