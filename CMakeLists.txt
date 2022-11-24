@@ -5,3 +5,4 @@ project(initest VERSION 1.0.0.0)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 add_executable(ini_test ini_test.cpp)
+add_executable(ini_zhtest ini_zhtest.cpp)
