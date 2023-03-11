@@ -356,6 +356,43 @@ static int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
     return (xit_lvalue - xit_rvalue);
 }
 
+/**********************************************************/
+/**
+ * @brief 字符串忽略大小写的比对操作。
+ *
+ * @param [in ] xszt_lcmp : 比较操作的左值字符串。
+ * @param [in ] xszt_rcmp : 比较操作的右值字符串。
+ *
+ * @return int
+ *         - xszt_lcmp <  xszt_rcmp，返回 <= -1；
+ *         - xszt_lcmp == xszt_rcmp，返回 ==  0；
+ *         - xszt_lcmp >  xszt_rcmp，返回 >=  1；
+ */
+static int xstr_icmp(const char * xszt_lcmp, const char * xszt_rcmp)
+{
+    int xit_lvalue = 0;
+    int xit_rvalue = 0;
+
+    if (xszt_lcmp == xszt_rcmp)
+        return 0;
+    if (NULL == xszt_lcmp)
+        return -1;
+    if (NULL == xszt_rcmp)
+        return 1;
+
+    do
+    {
+        if (((xit_lvalue = (*(xszt_lcmp++))) >= 'A') && (xit_lvalue <= 'Z'))
+            xit_lvalue -= ('A' - 'a');
+
+        if (((xit_rvalue = (*(xszt_rcmp++))) >= 'A') && (xit_rvalue <= 'Z'))
+            xit_rvalue -= ('A' - 'a');
+
+    } while (xit_lvalue && (xit_lvalue == xit_rvalue));
+
+    return (xit_lvalue - xit_rvalue);
+}
+
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
