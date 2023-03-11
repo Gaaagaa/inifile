@@ -743,7 +743,7 @@ public:
     /**
      * @brief 键名。
      */
-    inline const std::string & xkey(void) const
+    inline const std::string & key(void) const
     {
         return m_xstr_kname;
     }
@@ -752,7 +752,7 @@ public:
     /**
      * @brief 键值。
      */
-    inline const std::string & xvalue(void) const
+    inline const std::string & value(void) const
     {
         return m_xstr_value;
     }
@@ -1113,13 +1113,13 @@ protected:
             xini_keyvalue_t * xnode_kvptr =
                     static_cast< xini_keyvalue_t * >(xnode_ptr);
 
-            if (NULL != find_knode(xnode_kvptr->xkey()))
+            if (NULL != find_knode(xnode_kvptr->key()))
             {
                 return false;
             }
 
             m_xlst_node.push_back(xnode_ptr);
-            m_xmap_ndkv.insert(std::make_pair(xnode_kvptr->xkey(), xnode_kvptr));
+            m_xmap_ndkv.insert(std::make_pair(xnode_kvptr->key(), xnode_kvptr));
             return true;
         }
 
@@ -1152,7 +1152,7 @@ protected:
             xini_keyvalue_t * xnode_ptr =
                 static_cast< xini_keyvalue_t * >(
                     const_cast< xini_node_t * >(*itlst));
-            if (0 == xstr_icmp(xstr_xkey.c_str(), xnode_ptr->xkey().c_str()))
+            if (0 == xstr_icmp(xstr_xkey.c_str(), xnode_ptr->key().c_str()))
             {
                 return xnode_ptr;
             }
