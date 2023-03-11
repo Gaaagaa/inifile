@@ -271,4 +271,93 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#if 0
+
+/** 空白字符集 */
+static const char xspace_chars[] = " \t\n\r\f\v";
+
+/**********************************************************/
+/**
+ * @brief 削除字符串头尾的字符集。
+ */
+static inline std::string &
+        xstr_trim(std::string & xstr,
+                  const char * xchars = xspace_chars)
+{
+    xstr.erase(xstr.find_last_not_of(xchars) + 1);
+    xstr.erase(0, xstr.find_first_not_of(xchars));
+
+    return xstr;
+}
+
+/**********************************************************/
+/**
+ * @brief 削除字符串头部的字符集。
+ */
+static inline std::string &
+        xstr_ltrim(std::string & xstr,
+                   const char * xchars = xspace_chars)
+{
+    xstr.erase(0, xstr.find_first_not_of(xchars));
+    return xstr;
+}
+
+/**********************************************************/
+/**
+ * @brief 削除字符串尾部的字符集。
+ */
+static inline std::string &
+        xstr_rtrim(std::string & xstr,
+                   const char * xchars = xspace_chars)
+{
+    xstr.erase(xstr.find_last_not_of(xchars) + 1);
+    return xstr;
+}
+
+/**********************************************************/
+/**
+ * @brief 判断是否为单行字符串。
+ */
+static inline bool xstr_is_single_line(const std::string & xstr)
+{
+    return (xstr.find_first_of("\r\n") == std::string::npos);
+}
+
+/**********************************************************/
+/**
+* @brief 字符串的比对操作。
+*
+* @param [in ] xszt_lcmp : 比较操作的左值字符串。
+* @param [in ] xszt_rcmp : 比较操作的右值字符串。
+*
+* @return int
+*         - xszt_lcmp <  xszt_rcmp，返回 <= -1；
+*         - xszt_lcmp == xszt_rcmp，返回 ==  0；
+*         - xszt_lcmp >  xszt_rcmp，返回 >=  1；
+*/
+static int xstr_cmp(const char * xszt_lcmp, const char * xszt_rcmp)
+{
+    int xit_lvalue = 0;
+    int xit_rvalue = 0;
+
+    if (xszt_lcmp == xszt_rcmp)
+        return 0;
+    if (NULL == xszt_lcmp)
+        return -1;
+    if (NULL == xszt_rcmp)
+        return 1;
+
+    do
+    {
+        xit_lvalue = (char)(*(xszt_lcmp++));
+        xit_rvalue = (char)(*(xszt_rcmp++));
+    } while (xit_lvalue && (xit_lvalue == xit_rvalue));
+
+    return (xit_lvalue - xit_rvalue);
+}
+
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+
 #endif // __XSTR_TRAITS_H__
