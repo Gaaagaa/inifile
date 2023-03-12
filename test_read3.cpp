@@ -5,7 +5,7 @@
  * @author  : Gaaagaa
  * @date    : 2023-03-11
  * @version : 1.0.0.0
- * @brief   : INI 的 （同步默认值）读测试 示例程序。
+ * @brief   : INI 的 （同步写入默认值）读测试 示例程序。
  */
 
 /**

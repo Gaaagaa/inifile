@@ -681,7 +681,7 @@ protected:
 
     /**********************************************************/
     /**
-     * @brief 数值的读操作（同步默认值）。
+     * @brief 数值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
     template< typename __number_type >
     __number_type try_nset(__number_type x_default)
@@ -706,7 +706,7 @@ protected:
 
     /**********************************************************/
     /**
-     * @brief 数值的读操作（同步默认值）。
+     * @brief 数值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
     template< typename __number_type >
     __number_type try_nset(__number_type x_default, std::streamsize x_precision)
@@ -731,7 +731,7 @@ protected:
 
     /**********************************************************/
     /**
-     * @brief bool 值的读操作（同步默认值）。
+     * @brief bool 值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
     bool try_bset(bool x_default)
     {
@@ -829,8 +829,8 @@ public:
     const char *       operator () (const std::string & x_default) const { return this->operator ()(x_default.c_str()); }
 
     //======================================
-    // 与重载的 operator () 操作符功能类似，
-    // 但会使用默认值更新空键值
+    // 与重载的 operator () 带默认值读取操作符功能类似，
+    // 但键值为 空（或格式非法）时，会同步写入默认值
 
     const char * try_value(const char * x_default)
     {
