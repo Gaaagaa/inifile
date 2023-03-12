@@ -877,8 +877,6 @@ public:
 
     xini_keyvalue_t & operator = (const std::string & x_value) { set_value(x_value); return *this; }
 
-    //======================================
-
     /**********************************************************/
     /**
      * @brief 键值节点相互赋值时，只 取值 而 忽略 键名。
@@ -889,6 +887,8 @@ public:
             invk_set_value(x_value.value());
         return *this;
     }
+
+    //======================================
 
     // public interfaces
 public:
