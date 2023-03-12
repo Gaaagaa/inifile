@@ -1,11 +1,11 @@
 ﻿/**
- * @file test_read1.cpp
+ * @file test_read2.cpp
  * Copyright (c) 2023 Gaaagaa. All rights reserved.
  * 
  * @author  : Gaaagaa
  * @date    : 2023-03-11
  * @version : 1.0.0.0
- * @brief   : INI 的 读测试 示例程序。
+ * @brief   : INI 的 （带默认值）读测试 示例程序。
  */
 
 /**
@@ -37,7 +37,7 @@
 
 /**********************************************************/
 /**
- * @brief 测试 INI 的数据 常规读取操作。
+ * @brief 测试 INI 的数据 带默认值 的读取操作。
  */
 void test_ini_read(const std::string & xstr_file);
 
@@ -77,39 +77,39 @@ int main(int argc, char * argv[])
 
 /**********************************************************/
 /**
- * @brief 测试 INI 的数据 常规读取操作。
+ * @brief 测试 INI 的数据 带默认值 的读取操作。
  */
 void test_ini_read(const std::string & xstr_file)
 {
     xini_file_t xini_file(xstr_file);
 
-    std::string        vText1    = (const char *)xini_file["section1"]["Text1"   ];
-    const char *       vText2    = xini_file["section1"]["Text2"   ];
-    const char *       vText3    = xini_file["section1"]["Text3"   ];
-    bool               vBool1    = xini_file["section1"]["Bool1"   ];
-    bool               vBool2    = xini_file["section1"]["Bool2"   ];
-    short              vSInt1    = xini_file["section1"]["SInt1"   ];
-    short              vSInt2    = xini_file["section1"]["SInt2"   ];
-    unsigned short     vUSInt1   = xini_file["section1"]["USInt1"  ];
-    unsigned short     vUSInt2   = xini_file["section1"]["USInt2"  ];
-    int                vInt1     = xini_file["section1"]["Int1"    ];
-    int                vInt2     = xini_file["section1"]["Int2"    ];
-    unsigned int       vUInt1    = xini_file["section1"]["UInt1"   ];
-    unsigned int       vUInt2    = xini_file["section1"]["UInt2"   ];
-    long               vLong1    = xini_file["section1"]["Long1"   ];
-    long               vLong2    = xini_file["section1"]["Long2"   ];
-    unsigned long      vULong1   = xini_file["section1"]["ULong1"  ];
-    unsigned long      vULong2   = xini_file["section1"]["ULong2"  ];
-    long long          vLLong1   = xini_file["section1"]["LLong1"  ];
-    long long          vLLong2   = xini_file["section1"]["LLong2"  ];
-    unsigned long long vULLong1  = xini_file["section1"]["ULLong1" ];
-    unsigned long long vULLong2  = xini_file["section1"]["ULLong2" ];
-    float              vFloat1   = xini_file["section1"]["Float1"  ];
-    float              vFloat2   = xini_file["section1"]["Float2"  ];
-    double             vDouble1  = xini_file["section1"]["Double1" ];
-    double             vDouble2  = xini_file["section1"]["Double2" ];
-    long double        vLDouble1 = xini_file["section1"]["LDouble1"];
-    long double        vLDouble2 = xini_file["section1"]["LDouble2"];
+    std::string        vText1    = xini_file["section1"]["Text1"   ](std::string("Default Text1")        );
+    const char *       vText2    = xini_file["section1"]["Text2"   ]("Default Text2"                     );
+    const char *       vText3    = xini_file["section1"]["Text3"   ]("Default Text3"                     );
+    bool               vBool1    = xini_file["section1"]["Bool1"   ](true                                );
+    bool               vBool2    = xini_file["section1"]["Bool2"   ](false                               );
+    short              vSInt1    = xini_file["section1"]["SInt1"   ]((short)12345                        );
+    short              vSInt2    = xini_file["section1"]["SInt2"   ]((short)0                            );
+    unsigned short     vUSInt1   = xini_file["section1"]["USInt1"  ]((unsigned short)256                 );
+    unsigned short     vUSInt2   = xini_file["section1"]["USInt2"  ]((unsigned short)128                 );
+    int                vInt1     = xini_file["section1"]["Int1"    ](1234567890                          );
+    int                vInt2     = xini_file["section1"]["Int2"    ](-1                                  );
+    unsigned int       vUInt1    = xini_file["section1"]["UInt1"   ](100000U                             );
+    unsigned int       vUInt2    = xini_file["section1"]["UInt2"   ](200000U                             );
+    long               vLong1    = xini_file["section1"]["Long1"   ](123456789L                          );
+    long               vLong2    = xini_file["section1"]["Long2"   ](987654321L                          );
+    unsigned long      vULong1   = xini_file["section1"]["ULong1"  ](10086UL                             );
+    unsigned long      vULong2   = xini_file["section1"]["ULong2"  ](10010UL                             );
+    long long          vLLong1   = xini_file["section1"]["LLong1"  ](10086LL                             );
+    long long          vLLong2   = xini_file["section1"]["LLong2"  ](10010LL                             );
+    unsigned long long vULLong1  = xini_file["section1"]["ULLong1" ](10086ULL                            );
+    unsigned long long vULLong2  = xini_file["section1"]["ULLong2" ](10010ULL                            );
+    float              vFloat1   = xini_file["section1"]["Float1"  ](3.1415926F                          );
+    float              vFloat2   = xini_file["section1"]["Float2"  ](-3.1415926F                         );
+    double             vDouble1  = xini_file["section1"]["Double1" ](2.7182818284590452                  );
+    double             vDouble2  = xini_file["section1"]["Double2" ](-2.7182818284590452                 );
+    long double        vLDouble1 = xini_file["section1"]["LDouble1"]((long double)0.61803398874989484820 );
+    long double        vLDouble2 = xini_file["section1"]["LDouble2"]((long double)-0.61803398874989484820);
 
     std::cout.precision(20);
     std::cout.setf(std::ios_base::boolalpha);
@@ -149,33 +149,33 @@ void test_ini_read(const std::string & xstr_file)
 
     std::cout << "----------------------------------------" << std::endl;
 
-    vText1    = (const char *)xini_file["section2"]["Text1"   ];
-    vText2    = xini_file["section2"]["Text2"   ];
-    vText3    = xini_file["section2"]["Text3"   ];
-    vBool1    = xini_file["section2"]["Bool1"   ];
-    vBool2    = xini_file["section2"]["Bool2"   ];
-    vSInt1    = xini_file["section2"]["SInt1"   ];
-    vSInt2    = xini_file["section2"]["SInt2"   ];
-    vUSInt1   = xini_file["section2"]["USInt1"  ];
-    vUSInt2   = xini_file["section2"]["USInt2"  ];
-    vInt1     = xini_file["section2"]["Int1"    ];
-    vInt2     = xini_file["section2"]["Int2"    ];
-    vUInt1    = xini_file["section2"]["UInt1"   ];
-    vUInt2    = xini_file["section2"]["UInt2"   ];
-    vLong1    = xini_file["section2"]["Long1"   ];
-    vLong2    = xini_file["section2"]["Long2"   ];
-    vULong1   = xini_file["section2"]["ULong1"  ];
-    vULong2   = xini_file["section2"]["ULong2"  ];
-    vLLong1   = xini_file["section2"]["LLong1"  ];
-    vLLong2   = xini_file["section2"]["LLong2"  ];
-    vULLong1  = xini_file["section2"]["ULLong1" ];
-    vULLong2  = xini_file["section2"]["ULLong2" ];
-    vFloat1   = xini_file["section2"]["Float1"  ];
-    vFloat2   = xini_file["section2"]["Float2"  ];
-    vDouble1  = xini_file["section2"]["Double1" ];
-    vDouble2  = xini_file["section2"]["Double2" ];
-    vLDouble1 = xini_file["section2"]["LDouble1"];
-    vLDouble2 = xini_file["section2"]["LDouble2"];
+    vText1    = xini_file["section2"]["Text1"   ](std::string("Default Text1")        );
+    vText2    = xini_file["section2"]["Text2"   ]("Default Text2"                     );
+    vText3    = xini_file["section2"]["Text3"   ]("Default Text3"                     );
+    vBool1    = xini_file["section2"]["Bool1"   ](true                                );
+    vBool2    = xini_file["section2"]["Bool2"   ](false                               );
+    vSInt1    = xini_file["section2"]["SInt1"   ]((short)12345                        );
+    vSInt2    = xini_file["section2"]["SInt2"   ]((short)0                            );
+    vUSInt1   = xini_file["section2"]["USInt1"  ]((unsigned short)256                 );
+    vUSInt2   = xini_file["section2"]["USInt2"  ]((unsigned short)128                 );
+    vInt1     = xini_file["section2"]["Int1"    ](1234567890                          );
+    vInt2     = xini_file["section2"]["Int2"    ](-1                                  );
+    vUInt1    = xini_file["section2"]["UInt1"   ](100000U                             );
+    vUInt2    = xini_file["section2"]["UInt2"   ](200000U                             );
+    vLong1    = xini_file["section2"]["Long1"   ](123456789L                          );
+    vLong2    = xini_file["section2"]["Long2"   ](987654321L                          );
+    vULong1   = xini_file["section2"]["ULong1"  ](10086UL                             );
+    vULong2   = xini_file["section2"]["ULong2"  ](10010UL                             );
+    vLLong1   = xini_file["section2"]["LLong1"  ](10086LL                             );
+    vLLong2   = xini_file["section2"]["LLong2"  ](10010LL                             );
+    vULLong1  = xini_file["section2"]["ULLong1" ](10086ULL                            );
+    vULLong2  = xini_file["section2"]["ULLong2" ](10010ULL                            );
+    vFloat1   = xini_file["section2"]["Float1"  ](3.1415926F                          );
+    vFloat2   = xini_file["section2"]["Float2"  ](-3.1415926F                         );
+    vDouble1  = xini_file["section2"]["Double1" ](2.7182818284590452                  );
+    vDouble2  = xini_file["section2"]["Double2" ](-2.7182818284590452                 );
+    vLDouble1 = xini_file["section2"]["LDouble1"]((long double)0.61803398874989484820 );
+    vLDouble2 = xini_file["section2"]["LDouble2"]((long double)-0.61803398874989484820);
 
     // 常规的读取操作
     std::cout << "[section2]" << std::endl;
