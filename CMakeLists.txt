@@ -6,3 +6,4 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 add_executable(read1 test_read1.cpp)
 add_executable(read2 test_read2.cpp)
+add_executable(read3 test_read3.cpp)
