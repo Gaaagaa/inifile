@@ -630,7 +630,7 @@ protected:
         std::istringstream istr(m_xstr_value);
         istr >> numb;
         if (istr.fail())
-            return 0;
+            return static_cast< __number_type >(0);
         return numb;
     }
 
@@ -654,45 +654,117 @@ protected:
 
     /**********************************************************/
     /**
-     * @brief 整数值的写操作。
+     * @brief 数值的写操作。
      */
-    template< typename __integer_type >
-    xini_keyvalue_t & set_ivalue(__integer_type x_value)
+    template< typename __number_type >
+    void set_nvalue(__number_type x_value)
     {
         std::ostringstream ostr;
         ostr << x_value;
+        assert(!ostr.fail());
         invk_set_value(ostr.str());
-        return *this;
     }
 
     /**********************************************************/
     /**
-     * @brief 实现浮点值的写操作。
+     * @brief 数值的写操作。
      */
-    template< typename __float_type >
-    xini_keyvalue_t & set_fvalue(
-        __float_type x_value, std::streamsize x_precision)
+    template< typename __number_type >
+    void set_nvalue(__number_type x_value, std::streamsize x_precision)
     {
         std::ostringstream ostr;
         ostr.precision(x_precision);
         ostr << x_value;
+        assert(!ostr.fail());
         invk_set_value(ostr.str());
-        return *this;
     }
 
     /**********************************************************/
     /**
-     * @brief 若当前值为 空 时，则更新为指定的值，最后再返回键值。
+     * @brief 数值的读操作（同步默认值）。
      */
-    template< typename __base_type >
-    __base_type try_set(__base_type x_value)
+    template< typename __number_type >
+    __number_type try_nset(__number_type x_default)
     {
         if (empty())
         {
-            this->operator = (x_value);
+            set_nvalue(x_default);
+            return x_default;
         }
 
-        return (__base_type)(*this);
+        __number_type      numb;
+        std::istringstream istr(m_xstr_value);
+        istr >> numb;
+        if (istr.fail())
+        {
+            set_nvalue(x_default);
+            return x_default;
+        }
+
+        return numb;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 数值的读操作（同步默认值）。
+     */
+    template< typename __number_type >
+    __number_type try_nset(__number_type x_default, std::streamsize x_precision)
+    {
+        if (empty())
+        {
+            set_nvalue(x_default, x_precision);
+            return x_default;
+        }
+
+        __number_type      numb;
+        std::istringstream istr(m_xstr_value);
+        istr >> numb;
+        if (istr.fail())
+        {
+            set_nvalue(x_default, x_precision);
+            return x_default;
+        }
+
+        return numb;
+    }
+
+    /**********************************************************/
+    /**
+     * @brief bool 值的读操作（同步默认值）。
+     */
+    bool try_bset(bool x_default)
+    {
+        //======================================
+        // 按 字符串 解析
+
+        if (empty())
+        {
+            invk_set_value(std::string(x_default ? "true" : "false"));
+            return x_default;
+        }
+
+        if (0 == xstr_icmp(m_xstr_value.c_str(), "true"))
+            return true;
+        if (0 == xstr_icmp(m_xstr_value.c_str(), "false"))
+            return false;
+
+        //======================================
+        // 按 整数值 解析
+
+        long               numb;
+        std::istringstream istr(m_xstr_value);
+        istr >> numb;
+        if (istr.fail())
+        {
+            invk_set_value(std::string(x_default ? "true" : "false"));
+            return x_default;
+        }
+
+        invk_set_value(std::string((0L != numb) ? "true" : "false"));
+        return (0L != numb);
+
+        //======================================
     }
 
     // operators
@@ -708,7 +780,7 @@ public:
             return true;
         if (0 == xstr_icmp(m_xstr_value.c_str(), "false"))
             return false;
-        return (0 != get_nvalue< int >());
+        return (0L != get_nvalue< long >());
     }
 
     operator short              () const { return get_nvalue< short              >(); }
@@ -760,38 +832,48 @@ public:
     // 与重载的 operator () 操作符功能类似，
     // 但会使用默认值更新空键值
 
-    const char *       try_value(const char *        x_default) { return try_set< const char *        >(x_default); }
-    bool               try_value(bool                x_default) { return try_set< bool                >(x_default); }
-    short              try_value(short               x_default) { return try_set< short               >(x_default); }
-    unsigned short     try_value(unsigned short      x_default) { return try_set< unsigned short      >(x_default); }
-    int                try_value(int                 x_default) { return try_set< int                 >(x_default); }
-    unsigned int       try_value(unsigned int        x_default) { return try_set< unsigned int        >(x_default); }
-    long               try_value(long                x_default) { return try_set< long                >(x_default); }
-    unsigned long      try_value(unsigned long       x_default) { return try_set< unsigned long       >(x_default); }
-    long long          try_value(long long           x_default) { return try_set< long long           >(x_default); }
-    unsigned long long try_value(unsigned long long  x_default) { return try_set< unsigned long long  >(x_default); }
-    float              try_value(float               x_default) { return try_set< float               >(x_default); }
-    double             try_value(double              x_default) { return try_set< double              >(x_default); }
-    long double        try_value(long double         x_default) { return try_set< long double         >(x_default); }
+    const char * try_value(const char * x_default)
+    {
+        if (empty())
+            set_value(x_default);
+        return m_xstr_value.c_str();
+    }
+
+    bool try_value(bool x_default)
+    {
+        return try_bset(x_default);
+    }
+
+    short              try_value(short               x_default) { return try_nset< short              >(x_default    ); }
+    unsigned short     try_value(unsigned short      x_default) { return try_nset< unsigned short     >(x_default    ); }
+    int                try_value(int                 x_default) { return try_nset< int                >(x_default    ); }
+    unsigned int       try_value(unsigned int        x_default) { return try_nset< unsigned int       >(x_default    ); }
+    long               try_value(long                x_default) { return try_nset< long               >(x_default    ); }
+    unsigned long      try_value(unsigned long       x_default) { return try_nset< unsigned long      >(x_default    ); }
+    long long          try_value(long long           x_default) { return try_nset< long long          >(x_default    ); }
+    unsigned long long try_value(unsigned long long  x_default) { return try_nset< unsigned long long >(x_default    ); }
+    float              try_value(float               x_default) { return try_nset< float              >(x_default,  6); }
+    double             try_value(double              x_default) { return try_nset< double             >(x_default, 16); }
+    long double        try_value(long double         x_default) { return try_nset< long double        >(x_default, 16); }
 
     const char *       try_value(const std::string & x_default) { return this->try_value(x_default.c_str()); }
 
     //======================================
     // 基础数据类型的写操作
 
-    xini_keyvalue_t & operator = (const char *       x_value) { set_value(std::string(x_value)); return *this; }
-    xini_keyvalue_t & operator = (bool x_value) { invk_set_value(std::string(x_value ? "true" : "false")); return *this; }
-    xini_keyvalue_t & operator = (short              x_value) { return set_ivalue< short              >(x_value); }
-    xini_keyvalue_t & operator = (unsigned short     x_value) { return set_ivalue< unsigned short     >(x_value); }
-    xini_keyvalue_t & operator = (int                x_value) { return set_ivalue< int                >(x_value); }
-    xini_keyvalue_t & operator = (unsigned int       x_value) { return set_ivalue< unsigned int       >(x_value); }
-    xini_keyvalue_t & operator = (long               x_value) { return set_ivalue< long               >(x_value); }
-    xini_keyvalue_t & operator = (unsigned long      x_value) { return set_ivalue< unsigned long      >(x_value); }
-    xini_keyvalue_t & operator = (long long          x_value) { return set_ivalue< long long          >(x_value); }
-    xini_keyvalue_t & operator = (unsigned long long x_value) { return set_ivalue< unsigned long long >(x_value); }
-    xini_keyvalue_t & operator = (float              x_value) { return set_fvalue< float              >(x_value,  6); }
-    xini_keyvalue_t & operator = (double             x_value) { return set_fvalue< double             >(x_value, 16); }
-    xini_keyvalue_t & operator = (long double        x_value) { return set_fvalue< long double        >(x_value, 16); }
+    xini_keyvalue_t & operator = (const char *       x_value) { set_value(std::string(x_value));               return *this; }
+    xini_keyvalue_t & operator = (bool               x_value) { invk_set_value(std::string(x_value ? "true" : "false")); return *this; }
+    xini_keyvalue_t & operator = (short              x_value) { set_nvalue< short              >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned short     x_value) { set_nvalue< unsigned short     >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (int                x_value) { set_nvalue< int                >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned int       x_value) { set_nvalue< unsigned int       >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (long               x_value) { set_nvalue< long               >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned long      x_value) { set_nvalue< unsigned long      >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (long long          x_value) { set_nvalue< long long          >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned long long x_value) { set_nvalue< unsigned long long >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (float              x_value) { set_nvalue< float              >(x_value,  6); return *this; }
+    xini_keyvalue_t & operator = (double             x_value) { set_nvalue< double             >(x_value, 16); return *this; }
+    xini_keyvalue_t & operator = (long double        x_value) { set_nvalue< long double        >(x_value, 16); return *this; }
 
     xini_keyvalue_t & operator = (const std::string & x_value) { set_value(x_value); return *this; }
 
