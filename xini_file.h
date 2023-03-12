@@ -879,6 +879,17 @@ public:
 
     //======================================
 
+    /**********************************************************/
+    /**
+     * @brief 键值节点相互赋值时，只 取值 而 忽略 键名。
+     */
+    xini_keyvalue_t & operator = (const xini_keyvalue_t & x_value)
+    {
+        if (this != &x_value)
+            invk_set_value(x_value.value());
+        return *this;
+    }
+
     // public interfaces
 public:
     /**********************************************************/
