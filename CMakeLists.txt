@@ -9,3 +9,6 @@ add_executable(read2 test_read2.cpp)
 add_executable(read3 test_read3.cpp)
 
 add_executable(write1 test_write1.cpp)
+
+add_executable(trav1 test_trav1.cpp)
+
