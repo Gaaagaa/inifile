@@ -135,6 +135,3 @@ void test_ini_trav(const std::string & xstr_file)
         }
     }
 }
-
-
-
