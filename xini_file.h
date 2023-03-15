@@ -490,6 +490,14 @@ public:
         return *this;
     }
 
+    // public interfaces
+public:
+    /**********************************************************/
+    /**
+     * @brief 注释行字符串 内容。
+     */
+    inline const std::string & text(void) const { return m_xstr_text; }
+
 protected:
     std::string   m_xstr_text;  ///< 注释行字符串
 };
