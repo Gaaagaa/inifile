@@ -632,7 +632,7 @@ protected:
      * @brief 数值的读操作。
      */
     template< typename __number_type >
-    __number_type get_nvalue(void) const
+    __number_type get_numb(void) const
     {
         __number_type      numb;
         std::istringstream istr(m_xstr_value);
@@ -647,7 +647,7 @@ protected:
      * @brief 数值的读操作（带默认值）。
      */
     template< typename __number_type >
-    __number_type get_nvalue(__number_type x_default) const
+    __number_type get_numb(__number_type x_default) const
     {
         if (empty())
             return x_default;
@@ -665,7 +665,7 @@ protected:
      * @brief 数值的写操作。
      */
     template< typename __number_type >
-    void set_nvalue(__number_type x_value)
+    void set_numb(__number_type x_value)
     {
         std::ostringstream ostr;
         ostr << x_value;
@@ -678,7 +678,7 @@ protected:
      * @brief 数值的写操作。
      */
     template< typename __number_type >
-    void set_nvalue(__number_type x_value, std::streamsize x_precision)
+    void set_numb(__number_type x_value, std::streamsize x_precision)
     {
         std::ostringstream ostr;
         ostr.precision(x_precision);
@@ -692,11 +692,11 @@ protected:
      * @brief 数值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
     template< typename __number_type >
-    __number_type try_nset(__number_type x_default)
+    __number_type try_numb(__number_type x_default)
     {
         if (empty())
         {
-            set_nvalue(x_default);
+            set_numb(x_default);
             return x_default;
         }
 
@@ -705,7 +705,7 @@ protected:
         istr >> numb;
         if (istr.fail())
         {
-            set_nvalue(x_default);
+            set_numb(x_default);
             return x_default;
         }
 
@@ -717,11 +717,11 @@ protected:
      * @brief 数值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
     template< typename __number_type >
-    __number_type try_nset(__number_type x_default, std::streamsize x_precision)
+    __number_type try_numb(__number_type x_default, std::streamsize x_precision)
     {
         if (empty())
         {
-            set_nvalue(x_default, x_precision);
+            set_numb(x_default, x_precision);
             return x_default;
         }
 
@@ -730,7 +730,7 @@ protected:
         istr >> numb;
         if (istr.fail())
         {
-            set_nvalue(x_default, x_precision);
+            set_numb(x_default, x_precision);
             return x_default;
         }
 
@@ -741,7 +741,7 @@ protected:
     /**
      * @brief bool 值的读操作（键值为 空（或格式非法）时，同步写入默认值）。
      */
-    bool try_bset(bool x_default)
+    bool try_bool(bool x_default)
     {
         //======================================
         // 按 字符串 解析
@@ -788,20 +788,20 @@ public:
             return true;
         if (0 == xstr_icmp(m_xstr_value.c_str(), "false"))
             return false;
-        return (0L != get_nvalue< long >());
+        return (0L != get_numb< long >());
     }
 
-    operator short              () const { return get_nvalue< short              >(); }
-    operator unsigned short     () const { return get_nvalue< unsigned short     >(); }
-    operator int                () const { return get_nvalue< int                >(); }
-    operator unsigned int       () const { return get_nvalue< unsigned int       >(); }
-    operator long               () const { return get_nvalue< long               >(); }
-    operator unsigned long      () const { return get_nvalue< unsigned long      >(); }
-    operator long long          () const { return get_nvalue< long long          >(); }
-    operator unsigned long long () const { return get_nvalue< unsigned long long >(); }
-    operator float              () const { return get_nvalue< float              >(); }
-    operator double             () const { return get_nvalue< double             >(); }
-    operator long double        () const { return get_nvalue< long double        >(); }
+    operator short              () const { return get_numb< short              >(); }
+    operator unsigned short     () const { return get_numb< unsigned short     >(); }
+    operator int                () const { return get_numb< int                >(); }
+    operator unsigned int       () const { return get_numb< unsigned int       >(); }
+    operator long               () const { return get_numb< long               >(); }
+    operator unsigned long      () const { return get_numb< unsigned long      >(); }
+    operator long long          () const { return get_numb< long long          >(); }
+    operator unsigned long long () const { return get_numb< unsigned long long >(); }
+    operator float              () const { return get_numb< float              >(); }
+    operator double             () const { return get_numb< double             >(); }
+    operator long double        () const { return get_numb< long double        >(); }
 
     //======================================
     // 重载 operator ()，实现带上默认值的读操作
@@ -819,20 +819,20 @@ public:
             return true;
         if (0 == xstr_icmp(m_xstr_value.c_str(), "false"))
             return false;
-        return (0 != get_nvalue< int >(x_default ? 1 : 0));
+        return (0 != get_numb< int >(x_default ? 1 : 0));
     }
 
-    short              operator () (short               x_default) const { return get_nvalue< short              >(x_default); }
-    unsigned short     operator () (unsigned short      x_default) const { return get_nvalue< unsigned short     >(x_default); }
-    int                operator () (int                 x_default) const { return get_nvalue< int                >(x_default); }
-    unsigned int       operator () (unsigned int        x_default) const { return get_nvalue< unsigned int       >(x_default); }
-    long               operator () (long                x_default) const { return get_nvalue< long               >(x_default); }
-    unsigned long      operator () (unsigned long       x_default) const { return get_nvalue< unsigned long      >(x_default); }
-    long long          operator () (long long           x_default) const { return get_nvalue< long long          >(x_default); }
-    unsigned long long operator () (unsigned long long  x_default) const { return get_nvalue< unsigned long long >(x_default); }
-    float              operator () (float               x_default) const { return get_nvalue< float              >(x_default); }
-    double             operator () (double              x_default) const { return get_nvalue< double             >(x_default); }
-    long double        operator () (long double         x_default) const { return get_nvalue< long double        >(x_default); }
+    short              operator () (short               x_default) const { return get_numb< short              >(x_default); }
+    unsigned short     operator () (unsigned short      x_default) const { return get_numb< unsigned short     >(x_default); }
+    int                operator () (int                 x_default) const { return get_numb< int                >(x_default); }
+    unsigned int       operator () (unsigned int        x_default) const { return get_numb< unsigned int       >(x_default); }
+    long               operator () (long                x_default) const { return get_numb< long               >(x_default); }
+    unsigned long      operator () (unsigned long       x_default) const { return get_numb< unsigned long      >(x_default); }
+    long long          operator () (long long           x_default) const { return get_numb< long long          >(x_default); }
+    unsigned long long operator () (unsigned long long  x_default) const { return get_numb< unsigned long long >(x_default); }
+    float              operator () (float               x_default) const { return get_numb< float              >(x_default); }
+    double             operator () (double              x_default) const { return get_numb< double             >(x_default); }
+    long double        operator () (long double         x_default) const { return get_numb< long double        >(x_default); }
 
     const char *       operator () (const std::string & x_default) const { return this->operator ()(x_default.c_str()); }
 
@@ -849,20 +849,20 @@ public:
 
     bool try_value(bool x_default)
     {
-        return try_bset(x_default);
+        return try_bool(x_default);
     }
 
-    short              try_value(short               x_default) { return try_nset< short              >(x_default    ); }
-    unsigned short     try_value(unsigned short      x_default) { return try_nset< unsigned short     >(x_default    ); }
-    int                try_value(int                 x_default) { return try_nset< int                >(x_default    ); }
-    unsigned int       try_value(unsigned int        x_default) { return try_nset< unsigned int       >(x_default    ); }
-    long               try_value(long                x_default) { return try_nset< long               >(x_default    ); }
-    unsigned long      try_value(unsigned long       x_default) { return try_nset< unsigned long      >(x_default    ); }
-    long long          try_value(long long           x_default) { return try_nset< long long          >(x_default    ); }
-    unsigned long long try_value(unsigned long long  x_default) { return try_nset< unsigned long long >(x_default    ); }
-    float              try_value(float               x_default) { return try_nset< float              >(x_default,  6); }
-    double             try_value(double              x_default) { return try_nset< double             >(x_default, 16); }
-    long double        try_value(long double         x_default) { return try_nset< long double        >(x_default, 16); }
+    short              try_value(short               x_default) { return try_numb< short              >(x_default    ); }
+    unsigned short     try_value(unsigned short      x_default) { return try_numb< unsigned short     >(x_default    ); }
+    int                try_value(int                 x_default) { return try_numb< int                >(x_default    ); }
+    unsigned int       try_value(unsigned int        x_default) { return try_numb< unsigned int       >(x_default    ); }
+    long               try_value(long                x_default) { return try_numb< long               >(x_default    ); }
+    unsigned long      try_value(unsigned long       x_default) { return try_numb< unsigned long      >(x_default    ); }
+    long long          try_value(long long           x_default) { return try_numb< long long          >(x_default    ); }
+    unsigned long long try_value(unsigned long long  x_default) { return try_numb< unsigned long long >(x_default    ); }
+    float              try_value(float               x_default) { return try_numb< float              >(x_default,  6); }
+    double             try_value(double              x_default) { return try_numb< double             >(x_default, 16); }
+    long double        try_value(long double         x_default) { return try_numb< long double        >(x_default, 16); }
 
     const char *       try_value(const std::string & x_default) { return this->try_value(x_default.c_str()); }
 
@@ -871,17 +871,17 @@ public:
 
     xini_keyvalue_t & operator = (const char *       x_value) { set_value(std::string(x_value));               return *this; }
     xini_keyvalue_t & operator = (bool               x_value) { invk_set_value(std::string(x_value ? "true" : "false")); return *this; }
-    xini_keyvalue_t & operator = (short              x_value) { set_nvalue< short              >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (unsigned short     x_value) { set_nvalue< unsigned short     >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (int                x_value) { set_nvalue< int                >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (unsigned int       x_value) { set_nvalue< unsigned int       >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (long               x_value) { set_nvalue< long               >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (unsigned long      x_value) { set_nvalue< unsigned long      >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (long long          x_value) { set_nvalue< long long          >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (unsigned long long x_value) { set_nvalue< unsigned long long >(x_value    ); return *this; }
-    xini_keyvalue_t & operator = (float              x_value) { set_nvalue< float              >(x_value,  6); return *this; }
-    xini_keyvalue_t & operator = (double             x_value) { set_nvalue< double             >(x_value, 16); return *this; }
-    xini_keyvalue_t & operator = (long double        x_value) { set_nvalue< long double        >(x_value, 16); return *this; }
+    xini_keyvalue_t & operator = (short              x_value) { set_numb< short              >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned short     x_value) { set_numb< unsigned short     >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (int                x_value) { set_numb< int                >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned int       x_value) { set_numb< unsigned int       >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (long               x_value) { set_numb< long               >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned long      x_value) { set_numb< unsigned long      >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (long long          x_value) { set_numb< long long          >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (unsigned long long x_value) { set_numb< unsigned long long >(x_value    ); return *this; }
+    xini_keyvalue_t & operator = (float              x_value) { set_numb< float              >(x_value,  6); return *this; }
+    xini_keyvalue_t & operator = (double             x_value) { set_numb< double             >(x_value, 16); return *this; }
+    xini_keyvalue_t & operator = (long double        x_value) { set_numb< long double        >(x_value, 16); return *this; }
 
     xini_keyvalue_t & operator = (const std::string & x_value) { set_value(x_value); return *this; }
 
