@@ -12,3 +12,5 @@ add_executable(write1 test_write1.cpp)
 
 add_executable(trav1 test_trav1.cpp)
 
+add_executable(stream test_stream.cpp)
+
