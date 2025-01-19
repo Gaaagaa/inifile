@@ -1087,6 +1087,11 @@ protected:
         m_xmap_ndkv.clear();
     }
 
+    // 禁用 拷贝构造 和 =负值 操作
+private:
+    xini_section_t(const xini_section_t & xobject);
+    xini_section_t & operator = (const xini_section_t & xobject);
+
     // overrides
 public:
     /**********************************************************/
@@ -1646,10 +1651,16 @@ public:
         load(xstr_filepath);
     }
 
+public:
     virtual ~xini_file_t(void)
     {
         release();
     }
+
+    // 禁用 拷贝构造 和 =负值 操作
+private:
+    xini_file_t(const xini_file_t & xobject);
+    xini_file_t & operator = (const xini_file_t & xobject);
 
     // overrides
 public:
