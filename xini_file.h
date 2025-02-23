@@ -1216,7 +1216,7 @@ public:
     /**
      * @brief 分节 是否为空。
      */
-    inline bool empty() const
+    inline bool empty(void) const
     {
         return m_xlst_node.empty();
     }
@@ -1234,9 +1234,9 @@ public:
     /**
      * @brief 分节 内的 键值节点 数量是否为空。
      */
-    inline bool kv_empty() const
+    inline bool kv_empty(void) const
     {
-        return m_xlst_node.empty();
+        return m_xmap_ndkv.empty();
     }
 
     /**********************************************************/
