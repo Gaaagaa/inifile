@@ -1223,6 +1223,24 @@ public:
 
     /**********************************************************/
     /**
+     * @brief 分节 内的 键值节点 数量。
+     */
+    inline size_t kv_size(void) const
+    {
+        return m_xmap_ndkv.size();
+    }
+
+    /**********************************************************/
+    /**
+     * @brief 分节 内的 键值节点 数量是否为空。
+     */
+    inline bool kv_empty() const
+    {
+        return m_xlst_node.empty();
+    }
+
+    /**********************************************************/
+    /**
      * @brief 判断当前分节是否以空行结尾。
      */
     inline bool has_end_nilline(void) const
